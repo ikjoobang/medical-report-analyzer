@@ -307,17 +307,26 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, fileName
                 <span>생활 습관 권장사항</span>
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {result.aiInterpretation.lifestyleRecommendations}
+                {result.aiInterpretation.preventionAdvice}
               </p>
             </div>
 
             <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
               <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
                 <span className="text-lg">📝</span>
-                <span>쉬운 설명</span>
+                <span>진행 위험도</span>
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {result.aiInterpretation.simpleExplanation}
+                {result.aiInterpretation.progressionRisk}
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4">
+              <h3 className="font-semibold text-indigo-800 dark:text-indigo-300 mb-2 flex items-center gap-2">
+                <span className="text-lg">🚨</span>
+                <span>긴급도 설명</span>
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {result.aiInterpretation.urgencyExplanation}
               </p>
             </div>
           </div>
@@ -336,5 +345,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, fileName
     </div>
   );
 };
+
+
 
 

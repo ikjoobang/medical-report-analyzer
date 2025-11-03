@@ -42,8 +42,9 @@ export interface Recommendations {
 export interface AIInterpretation {
   whyThisDiagnosis: string;
   riskFactors: string;
-  lifestyleRecommendations: string;
-  simpleExplanation: string;
+  progressionRisk: string;
+  preventionAdvice: string;
+  urgencyExplanation: string;
 }
 
 export interface AnalysisResult {
@@ -74,4 +75,7 @@ export interface HistoryItem {
   result: AnalysisResult;
   thumbnail?: string;
 }
+
+
+
 
