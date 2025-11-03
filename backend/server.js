@@ -1,341 +1,346 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import multer from 'multer';
 import OpenAI from 'openai';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import multer from 'multer';
+import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Trust proxy for Railway
-app.set('trust proxy', 1);
-
-// Initialize OpenAI
+// OpenAI 클라이언트 초기화
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Middleware
-app.use(helmet());
+// Railway의 프록시 신뢰 설정
+app.set('trust proxy', 1);
+
+// 미들웨어 설정
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Helmet 보안 설정 (CSP 비활성화)
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
+
+// CORS 설정
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://medical-report-analyzer-ten.vercel.app'
+    'https://studiojuai.vercel.app'
   ],
   credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 10,
-  message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }
+  windowMs: 15 * 60 * 1000, // 15분
+  max: 100 // 최대 100개 요청
 });
-
 app.use('/api/', limiter);
 
-// File upload configuration
+// Multer 설정 (메모리 저장)
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: 10 * 1024 * 1024, // 10MB
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('지원하지 않는 파일 형식입니다. JPG, PNG, PDF만 업로드 가능합니다.'));
+      cb(new Error('지원하지 않는 파일 형식입니다.'));
     }
   }
 });
 
-// Health check endpoint
+// 헬스 체크 엔드포인트
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Medical Report API is running' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Main analysis endpoint
-app.post('/api/analyze', upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: '파일이 업로드되지 않았습니다.' });
-    }
-
-    console.log('File received:', req.file.originalname, req.file.mimetype, req.file.size);
-
-    const base64Image = req.file.buffer.toString('base64');
-    const mimeType = req.file.mimetype;
-    const dataUrl = `data:${mimeType};base64,${base64Image}`;
-
-    // Step 1: Basic medical report analysis
-    const basicPrompt = `당신은 의료 영상 판독 전문가입니다. 첨부된 의료 검사 결과지를 분석하여 다음 정보를 추출해주세요.
-
-반드시 아래 JSON 형식으로 응답해주세요:
-
-{
-  "patientInfo": {
-    "patientId": "환자 ID",
-    "name": "환자 이름 (있는 경우, 없으면 빈 문자열)",
-    "age": "나이",
-    "gender": "성별 (M/F)",
-    "birthDate": "생년월일 (있는 경우)"
-  },
-  "examInfo": {
-    "examType": "검사 종류 (예: Brain MRI)",
-    "examPart": "검사 부위",
-    "examDate": "검사 날짜",
-    "hospital": "병원명",
-    "referringPhysician": "의뢰 의사",
-    "readingPhysician": "판독 의사"
-  },
-  "findings": [
-    {
-      "category": "소견 카테고리",
-      "description": "상세 소견 설명",
-      "isNormal": true/false,
-      "severity": "정상/경증/중등도/중증"
-    }
-  ],
-  "impression": {
-    "summary": "판독 의견 요약",
-    "diagnosis": "주요 진단명",
-    "overallSeverity": "정상/경증/중등도/중증"
-  },
-  "medicalTerms": [
-    {
-      "term": "의학 용어",
-      "explanation": "쉬운 설명"
-    }
-  ],
-  "recommendations": {
-    "followUp": "추천 후속 조치",
-    "department": "추천 진료과",
-    "urgency": "낮음/중간/높음",
-    "notes": "기타 주의사항"
-  }
+// 파일을 Base64로 인코딩하는 함수
+function encodeFileToBase64(buffer) {
+  return buffer.toString('base64');
 }
 
-반드시 유효한 JSON 형식으로만 응답하세요.`;
+// PDF를 이미지로 변환하는 함수 (간단한 구현)
+async function convertPdfToImage(buffer) {
+  // 실제 환경에서는 pdf-parse 또는 pdf2pic 같은 라이브러리 사용 권장
+  // 현재는 Base64로 직접 전달
+  return buffer.toString('base64');
+}
 
-    console.log('Step 1: Analyzing medical report...');
-    const basicResponse = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: basicPrompt },
-            {
-              type: 'image_url',
-              image_url: { url: dataUrl },
-            },
-          ],
-        },
-      ],
-      max_tokens: 2000,
-      temperature: 0.3,
-    });
+// Step 1: 기본 판독지 분석
+async function analyzeBasicReport(base64Image, mimeType) {
+  const content = [
+    {
+      type: "text",
+      text: `당신은 의료 영상 판독 보고서 분석 전문가입니다. 
+제공된 판독지를 분석하여 다음 정보를 정확하게 추출해주세요:
 
-    let basicAnalysis;
-    try {
-      const analysisText = basicResponse.choices[0].message.content;
-      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-      basicAnalysis = JSON.parse(jsonMatch ? jsonMatch[0] : analysisText);
-    } catch (parseError) {
-      console.error('JSON parsing error:', parseError);
-      return res.status(500).json({ 
-        error: 'AI 응답 파싱 오류',
-        details: 'OpenAI 응답을 처리하는 중 오류가 발생했습니다.'
-      });
+1. 환자 정보 (Patient Information)
+2. 검사 정보 (Examination Information)
+3. 소견 (Findings)
+4. 결론/진단 (Conclusion/Diagnosis)
+
+각 섹션을 명확하게 구분하여 JSON 형식으로 응답해주세요.
+응답 형식:
+{
+  "patientInfo": {
+    "name": "환자명",
+    "id": "환자번호",
+    "age": "나이",
+    "gender": "성별",
+    "examDate": "검사일자"
+  },
+  "examInfo": {
+    "type": "검사종류",
+    "bodyPart": "검사부위",
+    "technique": "검사기법"
+  },
+  "findings": "소견 전체 내용",
+  "conclusion": "결론/진단 내용"
+}`
+    },
+    {
+      type: "image_url",
+      image_url: {
+        url: `data:${mimeType};base64,${base64Image}`
+      }
     }
+  ];
 
-    // Step 2: Get ICD-10 codes and additional tests
-    console.log('Step 2: Searching for ICD-10 codes and additional tests...');
-    const findingsText = basicAnalysis.findings.map(f => f.description).join('; ');
-    const diagnosis = basicAnalysis.impression.diagnosis || basicAnalysis.impression.summary;
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: content
+      }
+    ],
+    max_tokens: 2000,
+    temperature: 0.3,
+  });
 
-    const icdPrompt = `당신은 ICD-10 코드 전문가이자 임상 의학 전문가입니다.
+  return response.choices[0].message.content;
+}
 
-다음 판독 소견과 진단을 분석하여 JSON 형식으로 응답해주세요:
+// Step 2: ICD-10 코드 및 추가 검사 분석
+async function analyzeICDAndTests(findings, conclusion) {
+  const prompt = `당신은 의료 보험 청구 및 진료 계획 전문가입니다.
 
-진단: ${diagnosis}
-소견: ${findingsText}
+아래 판독지의 소견과 결론을 바탕으로 다음을 분석해주세요:
+
+**소견 (Findings):**
+${findings}
+
+**결론/진단 (Conclusion):**
+${conclusion}
+
+---
+
+다음 정보를 JSON 형식으로 제공해주세요:
 
 {
-  "diseaseCodes": {
+  "icdCodes": {
     "confirmed": [
       {
-        "code": "ICD-10 코드 (예: I63.9)",
-        "name": "질병명 (한글)",
-        "englishName": "질병명 (영문)",
-        "description": "코드 설명",
-        "confidence": "확실함"
+        "code": "ICD-10 코드",
+        "description": "병명 (한글)",
+        "confidence": "확실도 (높음/중간)"
       }
     ],
     "recommended": [
       {
         "code": "ICD-10 코드",
-        "name": "질병명 (한글)",
-        "englishName": "질병명 (영문)",
-        "description": "코드 설명",
-        "confidence": "추정"
+        "description": "병명 (한글)",
+        "confidence": "확실도 (중간/낮음)"
       }
     ]
   },
-  "confirmedDiseaseDetails": [
-    {
-      "diseaseName": "확실한 질병명",
-      "icdCode": "ICD-10 코드",
-      "additionalTests": {
-        "imaging": [
-          {
-            "testName": "검사명 (예: Brain MRI with contrast)",
-            "purpose": "검사 목적",
-            "reason": "왜 이 검사가 필요한지 상세 설명",
-            "expectedFindings": "이 검사로 확인할 수 있는 소견"
-          }
-        ],
-        "bloodTests": [
-          {
-            "testName": "혈액검사명",
-            "purpose": "검사 목적",
-            "reason": "필요한 이유",
-            "expectedFindings": "예상 결과"
-          }
-        ],
-        "functionalTests": [
-          {
-            "testName": "기능검사명",
-            "purpose": "검사 목적",
-            "reason": "필요한 이유",
-            "expectedFindings": "예상 결과"
-          }
-        ],
-        "biopsyTests": [
-          {
-            "testName": "조직검사명",
-            "purpose": "검사 목적",
-            "reason": "필요한 이유",
-            "expectedFindings": "예상 결과"
-          }
-        ],
-        "otherTests": [
-          {
-            "testName": "기타 검사명",
-            "purpose": "검사 목적",
-            "reason": "필요한 이유",
-            "expectedFindings": "예상 결과"
-          }
-        ]
-      },
-      "clinicPreparation": {
-        "items": [
-          "일반병원에서 준비해야 할 사항"
-        ],
-        "documents": [
-          "필요한 서류"
-        ],
-        "precautions": [
-          "주의사항"
-        ]
-      },
-      "universityHospitalStrategy": {
-        "department": "방문할 진료과",
-        "purpose": "방문 목적",
-        "requiredDocuments": [
-          "필요 서류"
-        ],
-        "expectedProcedure": "예상 진료 절차",
-        "insuranceTips": [
-          "보험 관련 팁"
-        ]
+  "additionalTests": {
+    "imaging": [
+      {
+        "test": "검사명",
+        "reason": "필요한 이유",
+        "urgency": "긴급도 (높음/중간/낮음)"
       }
-    }
+    ],
+    "laboratory": [
+      {
+        "test": "검사명",
+        "reason": "필요한 이유",
+        "urgency": "긴급도"
+      }
+    ],
+    "functional": [
+      {
+        "test": "검사명",
+        "reason": "필요한 이유",
+        "urgency": "긴급도"
+      }
+    ],
+    "biopsy": [
+      {
+        "test": "검사명",
+        "reason": "필요한 이유",
+        "urgency": "긴급도"
+      }
+    ],
+    "others": [
+      {
+        "test": "검사명",
+        "reason": "필요한 이유",
+        "urgency": "긴급도"
+      }
+    ]
+  },
+  "generalHospitalPreparation": [
+    "준비사항 1",
+    "준비사항 2"
+  ],
+  "universityHospitalStrategy": [
+    "전략 1",
+    "전략 2"
   ]
 }
 
-중요:
-1. 확실한 병명(confirmed) 2개를 반드시 제공하세요
-2. 추천 병명(recommended) 2개를 반드시 제공하세요
-3. 각 확실한 병명에 대해 가능한 모든 추가 검사를 나열하세요
-4. 검사 이유를 구체적으로 설명하세요
-5. 일반병원 준비사항과 대학병원 전략을 상세히 작성하세요
-6. 반드시 유효한 JSON으로만 응답하세요`;
+**요구사항:**
+1. **ICD-10 코드**: 
+   - "confirmed"에는 확실한 진단 2개 (confidence: 높음 또는 중간)
+   - "recommended"에는 추가 고려 병명 2개 (confidence: 중간 또는 낮음)
+   
+2. **추가 검사 (additionalTests)**:
+   - 각 카테고리별로 필요한 검사를 구체적으로 나열
+   - 영상검사(imaging), 혈액/조직검사(laboratory), 기능검사(functional), 조직검사(biopsy), 기타(others)
+   - 각 검사마다 이유와 긴급도 포함
 
-    const icdResponse = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: '당신은 ICD-10 코드 전문가이자 임상 의학 전문가입니다. 정확한 질병 코드와 필요한 검사를 제시합니다.'
-        },
-        {
-          role: 'user',
-          content: icdPrompt
-        }
-      ],
-      max_tokens: 3000,
-      temperature: 0.2,
+3. **일반병원 준비사항 (generalHospitalPreparation)**:
+   - 최소 3개 이상의 구체적인 준비사항
+   - 서류, 검사 준비, 복약 등
+
+4. **대학병원 방문 전략 (universityHospitalStrategy)**:
+   - 최소 3개 이상의 실질적인 전략
+   - 의뢰서 준비, 진료과 선택, 예약 팁 등
+
+**중요**: 모든 내용은 한국 의료 시스템 기준으로 작성해주세요.`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    max_tokens: 3000,
+    temperature: 0.5,
+  });
+
+  return response.choices[0].message.content;
+}
+
+// 메인 분석 엔드포인트
+app.post('/api/analyze', upload.single('file'), async (req, res) => {
+  try {
+    console.log('분석 요청 받음');
+
+    if (!req.file) {
+      return res.status(400).json({ 
+        error: '파일이 업로드되지 않았습니다.' 
+      });
+    }
+
+    console.log('파일 정보:', {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
     });
+
+    let base64Image;
+    const mimeType = req.file.mimetype;
+
+    // PDF 처리
+    if (mimeType === 'application/pdf') {
+      console.log('PDF 파일 처리 중...');
+      base64Image = await convertPdfToImage(req.file.buffer);
+    } else {
+      base64Image = encodeFileToBase64(req.file.buffer);
+    }
+
+    console.log('Step 1: 기본 판독지 분석 시작...');
+    
+    // Step 1: 기본 분석
+    const basicAnalysisText = await analyzeBasicReport(base64Image, mimeType);
+    console.log('Step 1 완료:', basicAnalysisText.substring(0, 200) + '...');
+
+    // JSON 파싱
+    let basicAnalysis;
+    try {
+      // Markdown 코드 블록 제거
+      const cleanedText = basicAnalysisText
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim();
+      basicAnalysis = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error('JSON 파싱 오류:', parseError);
+      console.error('원본 텍스트:', basicAnalysisText);
+      throw new Error('AI 응답을 파싱할 수 없습니다.');
+    }
+
+    console.log('Step 2: ICD-10 및 추가 검사 분석 시작...');
+
+    // Step 2: ICD-10 코드 및 추가 검사 분석
+    const icdAnalysisText = await analyzeICDAndTests(
+      basicAnalysis.findings,
+      basicAnalysis.conclusion
+    );
+    console.log('Step 2 완료:', icdAnalysisText.substring(0, 200) + '...');
 
     let icdAnalysis;
     try {
-      const icdText = icdResponse.choices[0].message.content;
-      const jsonMatch = icdText.match(/\{[\s\S]*\}/);
-      icdAnalysis = JSON.parse(jsonMatch ? jsonMatch[0] : icdText);
+      const cleanedText = icdAnalysisText
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim();
+      icdAnalysis = JSON.parse(cleanedText);
     } catch (parseError) {
-      console.error('ICD JSON parsing error:', parseError);
-      icdAnalysis = {
-        diseaseCodes: { confirmed: [], recommended: [] },
-        confirmedDiseaseDetails: []
-      };
+      console.error('ICD JSON 파싱 오류:', parseError);
+      console.error('원본 텍스트:', icdAnalysisText);
+      throw new Error('ICD 분석 응답을 파싱할 수 없습니다.');
     }
 
-    // Combine all results
+    // 최종 결과 합치기
     const finalResult = {
       ...basicAnalysis,
-      diseaseCodes: icdAnalysis.diseaseCodes,
-      confirmedDiseaseDetails: icdAnalysis.confirmedDiseaseDetails
+      icdCodes: icdAnalysis.icdCodes,
+      additionalTests: icdAnalysis.additionalTests,
+      generalHospitalPreparation: icdAnalysis.generalHospitalPreparation,
+      universityHospitalStrategy: icdAnalysis.universityHospitalStrategy
     };
 
-    res.json({
-      success: true,
-      data: finalResult,
-      metadata: {
-        fileName: req.file.originalname,
-        fileSize: req.file.size,
-        analyzedAt: new Date().toISOString(),
-        model: 'gpt-4o'
-      }
-    });
+    console.log('분석 완료, 결과 전송');
+    res.json(finalResult);
 
   } catch (error) {
-    console.error('Analysis error:', error);
+    console.error('분석 중 오류 발생:', error);
     
-    if (error.message.includes('API key')) {
-      return res.status(500).json({ 
-        error: 'OpenAI API 키 오류',
-        details: 'API 키를 확인해주세요.'
+    if (error.message?.includes('rate_limit_exceeded')) {
+      return res.status(429).json({ 
+        error: 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.' 
       });
     }
     
-    if (error.status === 429) {
-      return res.status(429).json({ 
-        error: '요청 한도 초과',
-        details: 'OpenAI API 사용 한도를 초과했습니다. 잠시 후 다시 시도해주세요.'
+    if (error.message?.includes('invalid_api_key')) {
+      return res.status(500).json({ 
+        error: 'API 키 설정에 문제가 있습니다.' 
       });
     }
 
@@ -346,47 +351,30 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
   }
 });
 
-// Test endpoint
-app.get('/api/test', async (req, res) => {
-  try {
-    await openai.models.list();
-    res.json({ 
-      status: 'ok',
-      message: 'OpenAI API 연결 성공',
-      apiKeyConfigured: !!process.env.OPENAI_API_KEY
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      status: 'error',
-      message: 'OpenAI API 연결 실패',
-      details: error.message
-    });
-  }
-});
-
-// Error handling middleware
+// 에러 핸들링 미들웨어
 app.use((error, req, res, next) => {
-  console.error('Error:', error);
+  console.error('서버 에러:', error);
   
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: '파일 크기가 10MB를 초과합니다.' });
+      return res.status(400).json({ 
+        error: '파일 크기는 10MB를 초과할 수 없습니다.' 
+      });
     }
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ 
+      error: '파일 업로드 중 오류가 발생했습니다.' 
+    });
   }
   
-  res.status(500).json({ error: error.message || '서버 오류가 발생했습니다.' });
+  res.status(500).json({ 
+    error: '서버 내부 오류가 발생했습니다.' 
+  });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: '요청하신 엔드포인트를 찾을 수 없습니다.' });
+// 서버 시작
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
+  console.log(`환경: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Medical Report API server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔑 OpenAI API Key configured: ${!!process.env.OPENAI_API_KEY}`);
-  console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-});
+export default app;
