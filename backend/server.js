@@ -22,12 +22,28 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://studiojuai.vercel.app',
-    'https://medical-report-analyzer-ten.vercel.app'
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    const allowedDomains = [
+      'http://localhost:5173',
+      'https://studiojuai.vercel.app',
+      'https://medical-report-analyzer-ten.vercel.app',
+      /^https:\/\/medical-report-analyzer-.*\.vercel\.app$/
+    ];
+    
+    if (!origin || allowedDomains.some(domain => {
+      if (domain instanceof RegExp) {
+        return domain.test(origin);
+      }
+      return domain === origin;
+    })) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 const limiter = rateLimit({
@@ -284,6 +300,7 @@ ${JSON.stringify(examInfo)}
 app.post('/api/analyze', upload.single('file'), async (req, res) => {
   try {
     console.log('분석 요청 받음');
+    console.log('Origin:', req.headers.origin);
 
     if (!req.file) {
       return res.status(400).json({ error: '파일이 업로드되지 않았습니다.' });
