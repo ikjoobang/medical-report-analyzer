@@ -1,4 +1,4 @@
-export interface PatientInfo {
+﻿export interface PatientInfo {
   patientId: string;
   name: string;
   age: string;
@@ -39,6 +39,12 @@ export interface Recommendations {
   urgency: '낮음' | '중간' | '높음';
   notes: string;
 }
+export interface AIInterpretation {
+  whyThisDiagnosis: string;
+  riskFactors: string;
+  lifestyleRecommendations: string;
+  simpleExplanation: string;
+}
 
 export interface AnalysisResult {
   patientInfo: PatientInfo;
@@ -47,6 +53,7 @@ export interface AnalysisResult {
   impression: Impression;
   medicalTerms: MedicalTerm[];
   recommendations: Recommendations;
+  aiInterpretation?: AIInterpretation;
 }
 
 export interface AnalysisResponse {
@@ -67,3 +74,4 @@ export interface HistoryItem {
   result: AnalysisResult;
   thumbnail?: string;
 }
+
