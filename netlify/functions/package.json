@@ -1,0 +1,10 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Medical Report Analyzer",
+  "main": "index.js",
+  "dependencies": {
+    "openai": "^4.20.1",
+    "lambda-multipart-parser": "^1.0.1"
+  }
+}
