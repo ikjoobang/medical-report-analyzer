@@ -123,13 +123,20 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
       "explanation": "쉬운 한글 설명"
     }
   ],
-  "recommendations": {
+    "recommendations": {
     "followUp": "추천 후속 조치 (예: 정기 검진, 추가 검사 등)",
     "department": "추천 진료과 (있는 경우)",
     "urgency": "긴급도 (낮음/중간/높음)",
     "notes": "기타 주의사항"
+  },
+  "aiInterpretation": {
+    "whyThisDiagnosis": "왜 이런 판독이 나왔는지 AI 전문가 관점에서 상세 설명 (환자 나이, 성별, 검사 결과를 종합하여 원인 분석)",
+    "riskFactors": "발견된 소견과 관련된 위험 요인 분석 (고혈압, 당뇨, 흡연 등과의 연관성)",
+    "progressionRisk": "현재 소견이 향후 어떻게 진행될 수 있는지 예측 (경증→중증 진행 가능성)",
+    "preventionAdvice": "구체적인 예방 및 관리 방법 (생활습관, 식이요법, 운동 등)",
+    "urgencyExplanation": "긴급도를 이렇게 판단한 이유 설명"
   }
-}
+
 
 중요 지침:
 1. 문서에서 직접 확인되는 정보만 추출하세요.

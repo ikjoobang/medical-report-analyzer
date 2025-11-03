@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+﻿import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { AnalysisResult } from '../types';
@@ -14,7 +14,7 @@ declare module 'jspdf' {
 // Export to Text
 export const exportToText = (result: AnalysisResult, fileName: string) => {
   let text = '='.repeat(60) + '\n';
-  text += '의료 영상 판독 분석 결과\n';
+  text += 'Studiojuai-의료 영상 판독 분석 결과\n';
   text += '='.repeat(60) + '\n\n';
 
   text += '[ 환자 정보 ]\n';
@@ -357,3 +357,4 @@ export const exportToPDF = (result: AnalysisResult, fileName: string) => {
 
   doc.save(`${fileName}_Analysis_Report.pdf`);
 };
+

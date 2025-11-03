@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { FileHeart, Loader2, ArrowLeft, Activity } from 'lucide-react';
 import { ThemeToggle } from './components/ThemeToggle';
 import { FileUpload } from './components/FileUpload';
@@ -87,7 +87,7 @@ function App() {
               <FileHeart className="text-primary dark:text-primary-dark" size={32} />
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
-                  의료 영상 판독 AI
+                  Studiojuai-의료 영상 판독
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   OpenAI Vision으로 빠르고 정확한 분석
@@ -273,7 +273,7 @@ function App() {
               정확한 진단과 치료를 위해서는 반드시 의료 전문가와 상담하시기 바랍니다.
             </p>
             <p className="pt-4 text-xs text-gray-500 dark:text-gray-500">
-              © 2025 Medical Report Analyzer. Powered by OpenAI Vision API.
+              @STUDIO_JU_AIㅣ© 2025. ALL RIGHTS RESERVED.
             </p>
           </div>
         </div>
@@ -293,3 +293,5 @@ function getSeverityColor(severity: string) {
 }
 
 export default App;
+
+
