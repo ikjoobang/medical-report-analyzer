@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000, // 60 seconds
+   timeout: 180000, // 180 seconds (3 minutes)
 });
 
 export const analyzeReport = async (file: File): Promise<AnalysisResponse> => {
