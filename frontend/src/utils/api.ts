@@ -1,12 +1,17 @@
 import axios from 'axios';
 import { AnalysisResponse } from '../types';
 
-// For Netlify deployment, API calls go through Netlify Functions
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
+// Railway backend URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.PROD 
+    ? 'https://medical-report-analyzer-production.up.railway.app' 
+    : 'http://localhost:3001'
+  );
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-   timeout: 180000, // 180 seconds (3 minutes)
+  timeout: 180000, // 180 seconds (3 minutes)
+  withCredentials: true, // CORS credentials 추가
 });
 
 export const analyzeReport = async (file: File): Promise<AnalysisResponse> => {
