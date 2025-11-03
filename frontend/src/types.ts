@@ -1,4 +1,4 @@
-﻿export interface PatientInfo {
+export interface PatientInfo {
   patientId: string;
   name: string;
   age: string;
@@ -39,12 +39,56 @@ export interface Recommendations {
   urgency: '낮음' | '중간' | '높음';
   notes: string;
 }
-export interface AIInterpretation {
-  whyThisDiagnosis: string;
-  riskFactors: string;
-  progressionRisk: string;
-  preventionAdvice: string;
-  urgencyExplanation: string;
+
+// New interfaces for disease codes and additional tests
+export interface DiseaseCode {
+  code: string;
+  name: string;
+  englishName: string;
+  description: string;
+  confidence: string;
+}
+
+export interface DiseaseCodes {
+  confirmed: DiseaseCode[];
+  recommended: DiseaseCode[];
+}
+
+export interface TestItem {
+  testName: string;
+  purpose: string;
+  reason: string;
+  expectedFindings: string;
+}
+
+export interface AdditionalTests {
+  imaging: TestItem[];
+  bloodTests: TestItem[];
+  functionalTests: TestItem[];
+  biopsyTests: TestItem[];
+  otherTests: TestItem[];
+}
+
+export interface ClinicPreparation {
+  items: string[];
+  documents: string[];
+  precautions: string[];
+}
+
+export interface UniversityHospitalStrategy {
+  department: string;
+  purpose: string;
+  requiredDocuments: string[];
+  expectedProcedure: string;
+  insuranceTips: string[];
+}
+
+export interface ConfirmedDiseaseDetail {
+  diseaseName: string;
+  icdCode: string;
+  additionalTests: AdditionalTests;
+  clinicPreparation: ClinicPreparation;
+  universityHospitalStrategy: UniversityHospitalStrategy;
 }
 
 export interface AnalysisResult {
@@ -54,7 +98,8 @@ export interface AnalysisResult {
   impression: Impression;
   medicalTerms: MedicalTerm[];
   recommendations: Recommendations;
-  aiInterpretation?: AIInterpretation;
+  diseaseCodes?: DiseaseCodes;
+  confirmedDiseaseDetails?: ConfirmedDiseaseDetail[];
 }
 
 export interface AnalysisResponse {
@@ -75,7 +120,3 @@ export interface HistoryItem {
   result: AnalysisResult;
   thumbnail?: string;
 }
-
-
-
-
