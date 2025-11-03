@@ -10,7 +10,7 @@ import {
   FileDown,
   Clipboard,
   TestTube,
-  Hospital,
+  Building2,
   FileCheck,
   Stethoscope
 } from 'lucide-react';
@@ -383,7 +383,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, fileName
           {/* University Hospital Strategy */}
           <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 shadow-lg theme-transition">
             <div className="flex items-center gap-3 mb-4">
-              <Hospital className="text-indigo-600 dark:text-indigo-400" size={28} />
+              <Building2 className="text-indigo-600 dark:text-indigo-400" size={28} />
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">대학병원 방문 전략</h3>
             </div>
             <div className="space-y-4">
