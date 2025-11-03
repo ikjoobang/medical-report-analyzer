@@ -361,11 +361,22 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
       console.error('원본 텍스트:', icdAnalysisText);
       throw new Error('ICD 분석 응답을 파싱할 수 없습니다.');
     }
-
+        // 프론트엔드와 호환되는 형식으로 변환
     const finalResult = {
-      ...basicAnalysis,
+      // 기본 정보 유지
+      patientInfo: basicAnalysis.patientInfo,
+      examInfo: basicAnalysis.examInfo,
+      findings: basicAnalysis.findings,
+      impression: basicAnalysis.impression,
+      medicalTerms: basicAnalysis.medicalTerms,
+      recommendations: basicAnalysis.recommendations,
+      
+      // ICD-10 정보 추가
       diseaseCodes: icdAnalysis.diseaseCodes,
-      confirmedDiseaseDetails: icdAnalysis.confirmedDiseaseDetails
+      confirmedDiseaseDetails: icdAnalysis.confirmedDiseaseDetails,
+      
+      // 연구 목적 명시
+      disclaimer: '본 분석 결과는 개인 연구 목적으로만 사용됩니다. 의료 진단이나 치료 목적으로 사용할 수 없습니다.'
     };
 
     console.log('분석 완료, 결과 전송');
