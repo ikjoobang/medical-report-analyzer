@@ -1,38 +1,38 @@
 import axios from 'axios';
-import { AnalysisResponse } from '../types';
+import type { AnalysisResult } from '../types';
 
-// Railway backend URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD 
-    ? 'https://medical-report-analyzer-production.up.railway.app' 
-    : 'http://localhost:3001'
-  );
+const API_BASE_URL = 'https://medical-report-analyzer-production.up.railway.app';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 180000, // 180 seconds (3 minutes)
-  withCredentials: true, // CORS credentials 추가
+  timeout: 180000,
+  withCredentials: true,
 });
 
-export const analyzeReport = async (file: File): Promise<AnalysisResponse> => {
+export const analyzeReport = async (file: File): Promise<AnalysisResult> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await api.post<AnalysisResponse>('/api/analyze', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  try {
+    console.log('API 요청 시작:', API_BASE_URL);
+    const response = await api.post<AnalysisResult>('/api/analyze', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
-  return response.data;
-};
-
-export const testConnection = async () => {
-  const response = await api.get('/api/test');
-  return response.data;
-};
-
-export const checkHealth = async () => {
-  const response = await api.get('/health');
-  return response.data;
+    console.log('API 응답 성공:', response.data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('API 에러 상세:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      throw new Error(error.response?.data?.error || '분석 중 오류가 발생했습니다.');
+    }
+    console.error('알 수 없는 에러:', error);
+    throw error;
+  }
 };
