@@ -30,7 +30,8 @@ app.use(helmet({
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://studiojuai.vercel.app'
+    'https://studiojuai.vercel.app',
+    'https://medical-report-analyzer-ten.vercel.app'
   ],
   credentials: true
 }));
