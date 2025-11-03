@@ -3,7 +3,6 @@ export interface PatientInfo {
   name: string;
   age: string;
   gender: string;
-  birthDate: string;
 }
 
 export interface ExamInfo {
@@ -11,21 +10,19 @@ export interface ExamInfo {
   examPart: string;
   examDate: string;
   hospital: string;
-  referringPhysician: string;
-  readingPhysician: string;
 }
 
 export interface Finding {
   category: string;
   description: string;
+  severity: string;
   isNormal: boolean;
-  severity: '정상' | '경증' | '중등도' | '중증';
 }
 
 export interface Impression {
-  summary: string;
   diagnosis: string;
-  overallSeverity: '정상' | '경증' | '중등도' | '중증';
+  summary: string;
+  overallSeverity: string;
 }
 
 export interface MedicalTerm {
@@ -34,13 +31,12 @@ export interface MedicalTerm {
 }
 
 export interface Recommendations {
+  urgency: string;
   followUp: string;
   department: string;
-  urgency: '낮음' | '중간' | '높음';
   notes: string;
 }
 
-// New interfaces for disease codes and additional tests
 export interface DiseaseCode {
   code: string;
   name: string;
@@ -54,7 +50,7 @@ export interface DiseaseCodes {
   recommended: DiseaseCode[];
 }
 
-export interface TestItem {
+export interface TestDetail {
   testName: string;
   purpose: string;
   reason: string;
@@ -62,11 +58,11 @@ export interface TestItem {
 }
 
 export interface AdditionalTests {
-  imaging: TestItem[];
-  bloodTests: TestItem[];
-  functionalTests: TestItem[];
-  biopsyTests: TestItem[];
-  otherTests: TestItem[];
+  imaging: TestDetail[];
+  bloodTests: TestDetail[];
+  functionalTests: TestDetail[];
+  biopsyTests: TestDetail[];
+  otherTests: TestDetail[];
 }
 
 export interface ClinicPreparation {
@@ -98,25 +94,7 @@ export interface AnalysisResult {
   impression: Impression;
   medicalTerms: MedicalTerm[];
   recommendations: Recommendations;
-  diseaseCodes?: DiseaseCodes;
-  confirmedDiseaseDetails?: ConfirmedDiseaseDetail[];
-}
-
-export interface AnalysisResponse {
-  success: boolean;
-  data: AnalysisResult;
-  metadata: {
-    fileName: string;
-    fileSize: number;
-    analyzedAt: string;
-    model: string;
-  };
-}
-
-export interface HistoryItem {
-  id: string;
-  fileName: string;
-  analyzedAt: string;
-  result: AnalysisResult;
-  thumbnail?: string;
+  diseaseCodes: DiseaseCodes;
+  confirmedDiseaseDetails: ConfirmedDiseaseDetail[];
+  disclaimer?: string;
 }
