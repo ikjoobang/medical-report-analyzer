@@ -72,8 +72,6 @@ function encodeFileToBase64(buffer) {
 
 // PDF를 이미지로 변환하는 함수 (간단한 구현)
 async function convertPdfToImage(buffer) {
-  // 실제 환경에서는 pdf-parse 또는 pdf2pic 같은 라이브러리 사용 권장
-  // 현재는 Base64로 직접 전달
   return buffer.toString('base64');
 }
 
@@ -85,28 +83,45 @@ async function analyzeBasicReport(base64Image, mimeType) {
       text: `당신은 의료 영상 판독 보고서 분석 전문가입니다. 
 제공된 판독지를 분석하여 다음 정보를 정확하게 추출해주세요:
 
-1. 환자 정보 (Patient Information)
-2. 검사 정보 (Examination Information)
-3. 소견 (Findings)
-4. 결론/진단 (Conclusion/Diagnosis)
-
-각 섹션을 명확하게 구분하여 JSON 형식으로 응답해주세요.
 응답 형식:
 {
   "patientInfo": {
+    "patientId": "환자번호",
     "name": "환자명",
-    "id": "환자번호",
     "age": "나이",
-    "gender": "성별",
-    "examDate": "검사일자"
+    "gender": "성별"
   },
   "examInfo": {
-    "type": "검사종류",
-    "bodyPart": "검사부위",
-    "technique": "검사기법"
+    "examType": "검사종류",
+    "examPart": "검사부위",
+    "examDate": "검사일자",
+    "hospital": "병원명"
   },
-  "findings": "소견 전체 내용",
-  "conclusion": "결론/진단 내용"
+  "findings": [
+    {
+      "category": "소견 카테고리",
+      "description": "소견 내용",
+      "severity": "정상/경증/중등도/중증",
+      "isNormal": true/false
+    }
+  ],
+  "impression": {
+    "diagnosis": "진단명",
+    "summary": "판독 요약",
+    "overallSeverity": "정상/경증/중등도/중증"
+  },
+  "medicalTerms": [
+    {
+      "term": "의학용어",
+      "explanation": "설명"
+    }
+  ],
+  "recommendations": {
+    "urgency": "높음/중간/낮음",
+    "followUp": "후속 조치",
+    "department": "추천 진료과",
+    "notes": "주의사항"
+  }
 }`
     },
     {
@@ -119,12 +134,7 @@ async function analyzeBasicReport(base64Image, mimeType) {
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
-    messages: [
-      {
-        role: "user",
-        content: content
-      }
-    ],
+    messages: [{ role: "user", content: content }],
     max_tokens: 2000,
     temperature: 0.3,
   });
@@ -133,114 +143,154 @@ async function analyzeBasicReport(base64Image, mimeType) {
 }
 
 // Step 2: ICD-10 코드 및 추가 검사 분석
-async function analyzeICDAndTests(findings, conclusion) {
+async function analyzeICDAndTests(findings, conclusion, examInfo) {
   const prompt = `당신은 의료 보험 청구 및 진료 계획 전문가입니다.
 
-아래 판독지의 소견과 결론을 바탕으로 다음을 분석해주세요:
+**판독 소견:**
+${JSON.stringify(findings)}
 
-**소견 (Findings):**
-${findings}
+**판독 의견:**
+${JSON.stringify(conclusion)}
 
-**결론/진단 (Conclusion):**
-${conclusion}
+**검사 정보:**
+${JSON.stringify(examInfo)}
 
 ---
 
-다음 정보를 JSON 형식으로 제공해주세요:
+다음 JSON 형식으로 응답해주세요:
 
 {
-  "icdCodes": {
+  "diseaseCodes": {
     "confirmed": [
       {
         "code": "ICD-10 코드",
-        "description": "병명 (한글)",
-        "confidence": "확실도 (높음/중간)"
+        "name": "병명 (한글)",
+        "englishName": "병명 (영문)",
+        "description": "병명 설명",
+        "confidence": "높음"
+      },
+      {
+        "code": "ICD-10 코드",
+        "name": "병명 (한글)",
+        "englishName": "병명 (영문)",
+        "description": "병명 설명",
+        "confidence": "중간"
       }
     ],
     "recommended": [
       {
         "code": "ICD-10 코드",
-        "description": "병명 (한글)",
-        "confidence": "확실도 (중간/낮음)"
+        "name": "병명 (한글)",
+        "englishName": "병명 (영문)",
+        "description": "병명 설명",
+        "confidence": "중간"
+      },
+      {
+        "code": "ICD-10 코드",
+        "name": "병명 (한글)",
+        "englishName": "병명 (영문)",
+        "description": "병명 설명",
+        "confidence": "낮음"
       }
     ]
   },
-  "additionalTests": {
-    "imaging": [
-      {
-        "test": "검사명",
-        "reason": "필요한 이유",
-        "urgency": "긴급도 (높음/중간/낮음)"
+  "confirmedDiseaseDetails": [
+    {
+      "diseaseName": "첫 번째 확실한 병명",
+      "icdCode": "ICD-10 코드",
+      "additionalTests": {
+        "imaging": [
+          {
+            "testName": "검사명",
+            "purpose": "검사 목적",
+            "reason": "필요한 이유",
+            "expectedFindings": "예상 소견"
+          }
+        ],
+        "bloodTests": [
+          {
+            "testName": "검사명",
+            "purpose": "검사 목적",
+            "reason": "필요한 이유",
+            "expectedFindings": "예상 결과"
+          }
+        ],
+        "functionalTests": [
+          {
+            "testName": "검사명",
+            "purpose": "검사 목적",
+            "reason": "필요한 이유",
+            "expectedFindings": "예상 결과"
+          }
+        ],
+        "biopsyTests": [
+          {
+            "testName": "검사명",
+            "purpose": "검사 목적",
+            "reason": "필요한 이유",
+            "expectedFindings": "예상 소견"
+          }
+        ],
+        "otherTests": [
+          {
+            "testName": "검사명",
+            "purpose": "검사 목적",
+            "reason": "필요한 이유",
+            "expectedFindings": "예상 결과"
+          }
+        ]
+      },
+      "clinicPreparation": {
+        "items": ["준비항목1", "준비항목2", "준비항목3"],
+        "documents": ["서류1", "서류2", "서류3"],
+        "precautions": ["주의사항1", "주의사항2", "주의사항3"]
+      },
+      "universityHospitalStrategy": {
+        "department": "방문 진료과",
+        "purpose": "방문 목적",
+        "requiredDocuments": ["필요서류1", "필요서류2"],
+        "expectedProcedure": "예상 진료 절차",
+        "insuranceTips": ["보험팁1", "보험팁2", "보험팁3"]
       }
-    ],
-    "laboratory": [
-      {
-        "test": "검사명",
-        "reason": "필요한 이유",
-        "urgency": "긴급도"
+    },
+    {
+      "diseaseName": "두 번째 확실한 병명",
+      "icdCode": "ICD-10 코드",
+      "additionalTests": {
+        "imaging": [],
+        "bloodTests": [],
+        "functionalTests": [],
+        "biopsyTests": [],
+        "otherTests": []
+      },
+      "clinicPreparation": {
+        "items": [],
+        "documents": [],
+        "precautions": []
+      },
+      "universityHospitalStrategy": {
+        "department": "",
+        "purpose": "",
+        "requiredDocuments": [],
+        "expectedProcedure": "",
+        "insuranceTips": []
       }
-    ],
-    "functional": [
-      {
-        "test": "검사명",
-        "reason": "필요한 이유",
-        "urgency": "긴급도"
-      }
-    ],
-    "biopsy": [
-      {
-        "test": "검사명",
-        "reason": "필요한 이유",
-        "urgency": "긴급도"
-      }
-    ],
-    "others": [
-      {
-        "test": "검사명",
-        "reason": "필요한 이유",
-        "urgency": "긴급도"
-      }
-    ]
-  },
-  "generalHospitalPreparation": [
-    "준비사항 1",
-    "준비사항 2"
-  ],
-  "universityHospitalStrategy": [
-    "전략 1",
-    "전략 2"
+    }
   ]
 }
 
 **요구사항:**
-1. **ICD-10 코드**: 
-   - "confirmed"에는 확실한 진단 2개 (confidence: 높음 또는 중간)
-   - "recommended"에는 추가 고려 병명 2개 (confidence: 중간 또는 낮음)
-   
-2. **추가 검사 (additionalTests)**:
-   - 각 카테고리별로 필요한 검사를 구체적으로 나열
-   - 영상검사(imaging), 혈액/조직검사(laboratory), 기능검사(functional), 조직검사(biopsy), 기타(others)
-   - 각 검사마다 이유와 긴급도 포함
-
-3. **일반병원 준비사항 (generalHospitalPreparation)**:
-   - 최소 3개 이상의 구체적인 준비사항
-   - 서류, 검사 준비, 복약 등
-
-4. **대학병원 방문 전략 (universityHospitalStrategy)**:
-   - 최소 3개 이상의 실질적인 전략
-   - 의뢰서 준비, 진료과 선택, 예약 팁 등
-
-**중요**: 모든 내용은 한국 의료 시스템 기준으로 작성해주세요.`;
+1. confirmed에는 정확히 2개의 확실한 병명
+2. recommended에는 정확히 2개의 추천 병명
+3. confirmedDiseaseDetails에는 confirmed 2개 병명에 대한 상세 정보
+4. 각 검사는 testName, purpose, reason, expectedFindings 필드 포함
+5. 모든 배열은 최소 1개 이상의 항목 포함 (비어있으면 빈 배열 [])
+6. 한국 의료 시스템 기준으로 작성`;
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
-    messages: [
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-    max_tokens: 3000,
+    messages: [{ role: "user", content: prompt }],
+    max_tokens: 4000,
     temperature: 0.5,
   });
 
@@ -253,9 +303,7 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
     console.log('분석 요청 받음');
 
     if (!req.file) {
-      return res.status(400).json({ 
-        error: '파일이 업로드되지 않았습니다.' 
-      });
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다.' });
     }
 
     console.log('파일 정보:', {
@@ -267,7 +315,6 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
     let base64Image;
     const mimeType = req.file.mimetype;
 
-    // PDF 처리
     if (mimeType === 'application/pdf') {
       console.log('PDF 파일 처리 중...');
       base64Image = await convertPdfToImage(req.file.buffer);
@@ -277,14 +324,11 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
 
     console.log('Step 1: 기본 판독지 분석 시작...');
     
-    // Step 1: 기본 분석
     const basicAnalysisText = await analyzeBasicReport(base64Image, mimeType);
-    console.log('Step 1 완료:', basicAnalysisText.substring(0, 200) + '...');
+    console.log('Step 1 완료');
 
-    // JSON 파싱
     let basicAnalysis;
     try {
-      // Markdown 코드 블록 제거
       const cleanedText = basicAnalysisText
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
@@ -298,12 +342,12 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
 
     console.log('Step 2: ICD-10 및 추가 검사 분석 시작...');
 
-    // Step 2: ICD-10 코드 및 추가 검사 분석
     const icdAnalysisText = await analyzeICDAndTests(
       basicAnalysis.findings,
-      basicAnalysis.conclusion
+      basicAnalysis.impression,
+      basicAnalysis.examInfo
     );
-    console.log('Step 2 완료:', icdAnalysisText.substring(0, 200) + '...');
+    console.log('Step 2 완료');
 
     let icdAnalysis;
     try {
@@ -321,10 +365,8 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
     // 최종 결과 합치기
     const finalResult = {
       ...basicAnalysis,
-      icdCodes: icdAnalysis.icdCodes,
-      additionalTests: icdAnalysis.additionalTests,
-      generalHospitalPreparation: icdAnalysis.generalHospitalPreparation,
-      universityHospitalStrategy: icdAnalysis.universityHospitalStrategy
+      diseaseCodes: icdAnalysis.diseaseCodes,
+      confirmedDiseaseDetails: icdAnalysis.confirmedDiseaseDetails
     };
 
     console.log('분석 완료, 결과 전송');
@@ -332,6 +374,7 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
 
   } catch (error) {
     console.error('분석 중 오류 발생:', error);
+    console.error('에러 스택:', error.stack);
     
     if (error.message?.includes('rate_limit_exceeded')) {
       return res.status(429).json({ 
@@ -347,7 +390,7 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
 
     res.status(500).json({ 
       error: '분석 중 오류가 발생했습니다.',
-      details: error.message 
+      details: error.message
     });
   }
 });
