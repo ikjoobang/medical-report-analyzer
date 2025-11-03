@@ -4,29 +4,23 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import OpenAI from 'openai';
 import multer from 'multer';
-import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// OpenAI 클라이언트 초기화
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Railway의 프록시 신뢰 설정
 app.set('trust proxy', 1);
 
-// 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Helmet 보안 설정 (CSP 비활성화)
 app.use(helmet({
   contentSecurityPolicy: false
 }));
 
-// CORS 설정
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -36,19 +30,17 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15분
-  max: 100 // 최대 100개 요청
+  windowMs: 15 * 60 * 1000,
+  max: 100
 });
 app.use('/api/', limiter);
 
-// Multer 설정 (메모리 저장)
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
+    fileSize: 10 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
@@ -60,22 +52,18 @@ const upload = multer({
   }
 });
 
-// 헬스 체크 엔드포인트
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// 파일을 Base64로 인코딩하는 함수
 function encodeFileToBase64(buffer) {
   return buffer.toString('base64');
 }
 
-// PDF를 이미지로 변환하는 함수 (간단한 구현)
 async function convertPdfToImage(buffer) {
   return buffer.toString('base64');
 }
 
-// Step 1: 기본 판독지 분석
 async function analyzeBasicReport(base64Image, mimeType) {
   const content = [
     {
@@ -102,7 +90,7 @@ async function analyzeBasicReport(base64Image, mimeType) {
       "category": "소견 카테고리",
       "description": "소견 내용",
       "severity": "정상/경증/중등도/중증",
-      "isNormal": true/false
+      "isNormal": true
     }
   ],
   "impression": {
@@ -142,7 +130,6 @@ async function analyzeBasicReport(base64Image, mimeType) {
   return response.choices[0].message.content;
 }
 
-// Step 2: ICD-10 코드 및 추가 검사 분석
 async function analyzeICDAndTests(findings, conclusion, examInfo) {
   const prompt = `당신은 의료 보험 청구 및 진료 계획 전문가입니다.
 
@@ -154,8 +141,6 @@ ${JSON.stringify(conclusion)}
 
 **검사 정보:**
 ${JSON.stringify(examInfo)}
-
----
 
 다음 JSON 형식으로 응답해주세요:
 
@@ -279,13 +264,12 @@ ${JSON.stringify(examInfo)}
   ]
 }
 
-**요구사항:**
+요구사항:
 1. confirmed에는 정확히 2개의 확실한 병명
 2. recommended에는 정확히 2개의 추천 병명
 3. confirmedDiseaseDetails에는 confirmed 2개 병명에 대한 상세 정보
 4. 각 검사는 testName, purpose, reason, expectedFindings 필드 포함
-5. 모든 배열은 최소 1개 이상의 항목 포함 (비어있으면 빈 배열 [])
-6. 한국 의료 시스템 기준으로 작성`;
+5. 한국 의료 시스템 기준으로 작성`;
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
@@ -297,7 +281,6 @@ ${JSON.stringify(examInfo)}
   return response.choices[0].message.content;
 }
 
-// 메인 분석 엔드포인트
 app.post('/api/analyze', upload.single('file'), async (req, res) => {
   try {
     console.log('분석 요청 받음');
@@ -362,7 +345,6 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
       throw new Error('ICD 분석 응답을 파싱할 수 없습니다.');
     }
 
-    // 최종 결과 합치기
     const finalResult = {
       ...basicAnalysis,
       diseaseCodes: icdAnalysis.diseaseCodes,
@@ -376,13 +358,13 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
     console.error('분석 중 오류 발생:', error);
     console.error('에러 스택:', error.stack);
     
-    if (error.message?.includes('rate_limit_exceeded')) {
+    if (error.message && error.message.includes('rate_limit_exceeded')) {
       return res.status(429).json({ 
         error: 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.' 
       });
     }
     
-    if (error.message?.includes('invalid_api_key')) {
+    if (error.message && error.message.includes('invalid_api_key')) {
       return res.status(500).json({ 
         error: 'API 키 설정에 문제가 있습니다.' 
       });
@@ -395,7 +377,6 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
   }
 });
 
-// 에러 핸들링 미들웨어
 app.use((error, req, res, next) => {
   console.error('서버 에러:', error);
   
@@ -415,7 +396,6 @@ app.use((error, req, res, next) => {
   });
 });
 
-// 서버 시작
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
   console.log(`환경: ${process.env.NODE_ENV || 'development'}`);
