@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, FileText, AlertCircle } from 'lucide-react';
 import { analyzeReport } from './utils/api';
-import { ResultsDisplay } from './components/ResultsDisplay';  // 👈 중괄호 확인!
+import { ResultsDisplay } from './components/ResultsDisplay';
 import type { AnalysisResult } from './types';
 
 function App() {
@@ -139,7 +139,7 @@ function App() {
               >
                 ← 새 분석하기
               </button>
-              <ResultsDisplay result={result} fileName={selectedFile?.name || 'analysis'} />
+              <ResultsDisplay results={result} />
             </div>
           )}
         </div>
