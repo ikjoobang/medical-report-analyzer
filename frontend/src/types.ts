@@ -3,6 +3,7 @@ export interface PatientInfo {
   name: string;
   age: string;
   gender: string;
+  birthDate?: string;
 }
 
 export interface ExamInfo {
@@ -10,6 +11,8 @@ export interface ExamInfo {
   examPart: string;
   examDate: string;
   hospital: string;
+  referringPhysician?: string;
+  readingPhysician?: string;
 }
 
 export interface Finding {
