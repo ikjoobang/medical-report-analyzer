@@ -1,0 +1,876 @@
+/* 전체 컨테이너 */
+.results-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+/* AI 분석 배너 */
+.ai-disclaimer-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ai-disclaimer-banner h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+.ai-disclaimer-banner p {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.95;
+}
+
+/* 정보 섹션 */
+.info-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.info-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #111827;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  gap: 10px;
+}
+
+.info-item .label {
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 80px;
+}
+
+.info-item .value {
+  color: #111827;
+}
+
+/* 질병 코드 섹션 */
+.disease-codes-section {
+  margin-bottom: 40px;
+}
+
+.disease-codes-section > h2 {
+  font-size: 24px;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.reference-note {
+  background: #f0f4ff;
+  border-left: 4px solid #4f46e5;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.findings-title {
+  font-size: 18px;
+  color: #374151;
+  margin: 30px 0 15px 0;
+  padding: 10px 15px;
+  background: #f9fafb;
+  border-left: 4px solid #6366f1;
+  border-radius: 4px;
+}
+
+/* 질병 카드 */
+.disease-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.disease-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.disease-card.priority-high {
+  border-color: #ef4444;
+  background: linear-gradient(to bottom, #fef2f2 0%, white 100%);
+}
+
+.disease-card.priority-moderate {
+  border-color: #f59e0b;
+  background: linear-gradient(to bottom, #fffbeb 0%, white 100%);
+}
+
+.disease-card.priority-low {
+  border-color: #10b981;
+  background: linear-gradient(to bottom, #f0fdf4 0%, white 100%);
+}
+
+.disease-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.disease-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.icd-code {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: 16px;
+  color: #1f2937;
+  background: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.disease-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.priority-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.priority-badge.priority-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.priority-badge.priority-moderate {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.priority-badge.priority-low {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.disease-english {
+  font-style: italic;
+  color: #6b7280;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.disease-description {
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.disease-description p {
+  margin: 0;
+  color: #374151;
+}
+
+.observed-features,
+.references,
+.next-steps {
+  margin: 15px 0;
+}
+
+.observed-features h4,
+.references h4,
+.next-steps h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 10px 0;
+}
+
+.observed-features ul,
+.references ul,
+.next-steps ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.observed-features li,
+.references li,
+.next-steps li {
+  padding: 6px 0;
+  color: #4b5563;
+}
+
+.observed-features {
+  background: #f0fdf4;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.references {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 15px;
+}
+
+.next-steps {
+  background: #ecfdf5;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.ai-warning {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+  font-weight: 500;
+  color: #92400e;
+  font-size: 14px;
+}
+
+/* 일반병원 전략 섹션 */
+.clinic-strategy-section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.clinic-strategy-section > h2 {
+  font-size: 24px;
+  color: #111827;
+  margin: 0 0 10px 0;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  margin: 0 0 30px 0;
+  font-size: 14px;
+}
+
+.test-category {
+  margin-bottom: 30px;
+}
+
+.test-category > h3 {
+  font-size: 18px;
+  color: #374151;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  background: linear-gradient(to right, #ede9fe, transparent);
+  border-left: 4px solid #8b5cf6;
+  border-radius: 4px;
+}
+
+.test-item {
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.test-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #111827;
+}
+
+.test-priority {
+  font-size: 14px;
+}
+
+.test-english {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.test-details {
+  margin-top: 12px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row.fasting {
+  background: #fef3c7;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #4b5563;
+  min-width: 100px;
+}
+
+.detail-value {
+  color: #111827;
+}
+
+/* 준비물 체크리스트 */
+.preparation-checklist {
+  margin: 30px 0;
+  padding: 25px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border: 1px solid #0ea5e9;
+}
+
+.preparation-checklist h3 {
+  margin: 0 0 20px 0;
+  color: #0c4a6e;
+}
+
+.checklist-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.checklist-item {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 3px solid #0ea5e9;
+}
+
+.checklist-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.checklist-checkbox {
+  font-size: 20px;
+  color: #0ea5e9;
+}
+
+.checklist-title {
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+}
+
+.importance-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.importance-badge.required {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.importance-badge.optional {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.checklist-reason,
+.checklist-howto {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* 타임라인 */
+.timeline {
+  margin: 30px 0;
+  padding: 25px;
+  background: linear-gradient(to bottom, #faf5ff, white);
+  border-radius: 8px;
+}
+
+.timeline h3 {
+  margin: 0 0 20px 0;
+  color: #6b21a8;
+}
+
+.timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #a855f7;
+}
+
+.timeline-day {
+  font-weight: bold;
+  color: #7c3aed;
+  min-width: 80px;
+  font-size: 14px;
+}
+
+.timeline-content h4 {
+  margin: 0 0 5px 0;
+  color: #111827;
+  font-size: 15px;
+}
+
+.timeline-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* 비용 요약 */
+.cost-summary {
+  margin: 30px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, #fef3c7, #fef9c3);
+  border-radius: 8px;
+  border: 2px solid #f59e0b;
+}
+
+.cost-summary h3 {
+  margin: 0 0 20px 0;
+  color: #92400e;
+}
+
+.cost-table {
+  background: white;
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.cost-row:last-child {
+  border-bottom: none;
+}
+
+.cost-row.total {
+  font-weight: bold;
+  font-size: 18px;
+  color: #111827;
+  padding-top: 15px;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 10px;
+}
+
+.cost-row.insurance {
+  background: #ecfdf5;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 10px;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.cost-label {
+  color: #4b5563;
+}
+
+.cost-value {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* 대학병원 전략 섹션 */
+.university-strategy-section {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.university-strategy-section > h2 {
+  font-size: 24px;
+  color: #111827;
+  margin: 0 0 30px 0;
+}
+
+.when-to-go {
+  background: #fef2f2;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #ef4444;
+  margin-bottom: 25px;
+}
+
+.when-to-go h3 {
+  margin: 0 0 15px 0;
+  color: #991b1b;
+}
+
+.when-to-go ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.when-to-go li {
+  margin: 8px 0;
+  color: #7f1d1d;
+}
+
+.additional-documents {
+  margin-bottom: 30px;
+}
+
+.additional-documents h3 {
+  margin: 0 0 20px 0;
+  color: #374151;
+}
+
+.document-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.document-card.important {
+  border: 2px solid #ef4444;
+  background: #fef2f2;
+}
+
+.document-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.document-header h4 {
+  margin: 0;
+  color: #111827;
+}
+
+.importance-tag {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.document-reason,
+.document-howto {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.document-template {
+  margin-top: 12px;
+  padding: 12px;
+  background: white;
+  border-left: 3px solid #6366f1;
+  border-radius: 4px;
+}
+
+.document-template p {
+  margin: 5px 0 0 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.questions-section {
+  background: #eff6ff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.questions-section h3 {
+  margin: 0 0 15px 0;
+  color: #1e40af;
+}
+
+.questions-list {
+  margin: 0;
+  padding-left: 25px;
+}
+
+.questions-list li {
+  margin: 10px 0;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.insurance-tips {
+  background: #f0fdf4;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.insurance-tips h3 {
+  margin: 0 0 15px 0;
+  color: #065f46;
+}
+
+.tip-card {
+  background: white;
+  padding: 12px 15px;
+  border-radius: 6px;
+  border-left: 3px solid #10b981;
+  margin-bottom: 10px;
+}
+
+.tip-title {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 5px;
+}
+
+.tip-benefit {
+  font-size: 13px;
+  color: #065f46;
+}
+
+/* 의학 용어 섹션 */
+.medical-terms-section {
+  margin-bottom: 40px;
+}
+
+.medical-terms-section > h2 {
+  font-size: 24px;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.term-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.term-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.term-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+}
+
+.korean-badge {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.term-body > div {
+  margin: 15px 0;
+}
+
+.korean-name {
+  font-size: 15px;
+  color: #374151;
+}
+
+.simple-explanation,
+.detailed-explanation,
+.analogy,
+.patient-context,
+.action {
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.simple-explanation {
+  background: #f0f9ff;
+  border-left: 3px solid #0ea5e9;
+}
+
+.detailed-explanation {
+  background: #f9fafb;
+}
+
+.analogy {
+  background: #fef3c7;
+  border-left: 3px solid #f59e0b;
+}
+
+.patient-context {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+}
+
+.action {
+  background: #ecfdf5;
+  border-left: 3px solid #10b981;
+}
+
+.term-body strong {
+  color: #374151;
+  font-size: 14px;
+}
+
+.term-body p {
+  margin: 8px 0 0 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* 면책 조항 */
+.disclaimer-section {
+  margin: 50px 0 30px 0;
+  padding-top: 30px;
+  border-top: 3px solid #ef4444;
+}
+
+.disclaimer-box {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 3px solid #dc2626;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.disclaimer-box h2 {
+  color: #991b1b;
+  margin: 0 0 20px 0;
+  font-size: 22px;
+}
+
+.disclaimer-content p {
+  line-height: 1.8;
+  color: #7f1d1d;
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+/* PDF 다운로드 버튼 */
+.action-buttons {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.download-pdf-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.download-pdf-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.download-pdf-btn:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .results-container {
+    padding: 15px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .disease-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .test-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .term-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cost-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
