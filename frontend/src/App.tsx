@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, FileText, AlertCircle } from 'lucide-react';
 import { analyzeReport } from './utils/api';
-import ResultsDisplay from './components/ResultsDisplay';
+import { ResultsDisplay } from './components/ResultsDisplay';  // 👈 중괄호 확인!
 import type { AnalysisResult } from './types';
 
 function App() {
@@ -36,7 +36,6 @@ function App() {
       const response = await analyzeReport(selectedFile);
       console.log('분석 완료:', response);
       
-      // 응답 데이터 검증
       if (!response || typeof response !== 'object') {
         throw new Error('잘못된 응답 형식입니다.');
       }
@@ -140,7 +139,7 @@ function App() {
               >
                 ← 새 분석하기
               </button>
-              <ResultsDisplay result={result} />
+              <ResultsDisplay result={result} fileName={selectedFile?.name || 'analysis'} />
             </div>
           )}
         </div>
