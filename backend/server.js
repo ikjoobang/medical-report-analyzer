@@ -314,22 +314,29 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
 
     const content = response.choices[0].message.content;
     
-    // JSON 추출
-    let analysisResult;
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysisResult = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('JSON 형식을 찾을 수 없습니다');
-      }
-    } catch (parseError) {
-      console.error('JSON 파싱 에러:', parseError);
-      return res.status(500).json({ 
-        error: 'AI 응답 파싱 실패',
-        details: parseError.message 
-      });
-    }
+    // JSON 추출 (개선된 버전)
+let analysisResult;
+try {
+  // 1. 먼저 ```json 코드 블록 제거
+  let cleanContent = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+  
+  // 2. JSON 부분만 추출
+  const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    analysisResult = JSON.parse(jsonMatch[0]);
+  } else {
+    // JSON을 찾을 수 없으면 원본 응답 로그 출력
+    console.error('OpenAI 원본 응답:', content.substring(0, 500));
+    throw new Error('JSON 형식을 찾을 수 없습니다');
+  }
+} catch (parseError) {
+  console.error('JSON 파싱 에러:', parseError);
+  console.error('응답 내용 샘플:', content.substring(0, 300));
+  return res.status(500).json({ 
+    error: 'AI 응답 파싱 실패. 다시 시도해주세요.',
+    details: parseError.message 
+  });
+}
 
     console.log('분석 완료, 결과 전송');
     res.json(analysisResult);
