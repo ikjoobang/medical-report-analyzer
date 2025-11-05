@@ -17,6 +17,16 @@ export interface ExamInfo {
   readingPhysician?: string;
 }
 
+// 관찰된 특징 (상세)
+export interface ObservedFeature {
+  technicalTerm: string;
+  simpleName: string;
+  whatItMeans: string;
+  analogy: string;
+  whyImportant: string;
+  locationInImage: string;
+}
+
 // 질병 코드
 export interface DiseaseCode {
   code: string;
@@ -24,7 +34,7 @@ export interface DiseaseCode {
   englishName: string;
   description: string;
   priority: 'HIGH' | 'MODERATE' | 'LOW';
-  observedFeatures: string[];
+  observedFeatures: string[] | ObservedFeature[];  // 문자열 배열 또는 객체 배열 모두 지원
   references: string[];
   nextSteps: string[];
 }
