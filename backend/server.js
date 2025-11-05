@@ -8,7 +8,7 @@ const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const openai = new OpenAI({
-  apiKey: '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'
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 // CORS 설정
