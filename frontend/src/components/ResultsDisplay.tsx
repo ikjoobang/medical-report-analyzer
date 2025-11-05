@@ -63,7 +63,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
       {/* 환자 정보 */}
       <section className="info-section patient-info">
-        <h2>👤 환자 정보</h2>
+        <h2 className="section-main-title">👤 환자 정보</h2>
         <div className="info-grid">
           <div className="info-item">
             <span className="label">이름:</span>
@@ -90,7 +90,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
       {/* 검사 정보 */}
       <section className="info-section exam-info">
-        <h2>🏥 검사 정보</h2>
+        <h2 className="section-main-title">🏥 검사 정보</h2>
         <div className="info-grid">
           <div className="info-item">
             <span className="label">검사일:</span>
@@ -111,7 +111,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
       {/* AI 관찰 주요 소견 */}
       <section className="disease-codes-section">
-        <h2>🔬 AI 관찰 주요 소견</h2>
+        <h2 className="section-main-title">🔬 AI 관찰 주요 소견</h2>
         
         <div className="reference-note">
           <strong>출처:</strong> ICD-10 WHO 국제질병분류 / GPT-4o Vision API / 대한의학회 진단 기준
@@ -120,14 +120,14 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
         {/* Primary 소견 */}
         {results.diseaseCodes.primary.length > 0 && (
           <div className="primary-findings">
-            <h3 className="findings-title">우선순위 높음 - 전문의 상담 권장</h3>
+            <h3 className="findings-title section-main-title">우선순위 높음 - 전문의 상담 권장</h3>
             
             {results.diseaseCodes.primary.map((disease, idx) => (
               <div key={idx} className={`disease-card ${getPriorityColor(disease.priority)}`}>
                 <div className="disease-header">
                   <div className="disease-title">
-                    <span className="icd-code">{disease.code}</span>
-                    <span className="disease-name">{disease.name}</span>
+                    <span className="icd-code section-main-title">{disease.code}</span>
+                    <span className="disease-name section-main-title">{disease.name}</span>
                   </div>
                   <span className={`priority-badge ${getPriorityColor(disease.priority)}`}>
                     {getPriorityLabel(disease.priority)}
@@ -143,7 +143,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
                 </div>
 
                 <div className="observed-features">
-                  <h4>영상에서 관찰된 특징:</h4>
+                  <h4 className="section-main-title">영상에서 관찰된 특징:</h4>
                   <ul>
                     {disease.observedFeatures.map((feature, i) => (
                       <li key={i}>• {feature}</li>
@@ -152,7 +152,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
                 </div>
 
                 <div className="references">
-                  <h4>참조 기준:</h4>
+                  <h4 className="section-main-title">참조 기준:</h4>
                   <ul>
                     {disease.references.map((ref, i) => (
                       <li key={i}>📚 {ref}</li>
@@ -181,14 +181,14 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
         {/* Secondary 소견 */}
         {results.diseaseCodes.secondary.length > 0 && (
           <div className="secondary-findings">
-            <h3 className="findings-title">추가 확인 필요</h3>
+            <h3 className="findings-title section-main-title">추가 확인 필요</h3>
             
             {results.diseaseCodes.secondary.map((disease, idx) => (
               <div key={idx} className={`disease-card ${getPriorityColor(disease.priority)}`}>
                 <div className="disease-header">
                   <div className="disease-title">
-                    <span className="icd-code">{disease.code}</span>
-                    <span className="disease-name">{disease.name}</span>
+                    <span className="icd-code section-main-title">{disease.code}</span>
+                    <span className="disease-name section-main-title">{disease.name}</span>
                   </div>
                   <span className={`priority-badge ${getPriorityColor(disease.priority)}`}>
                     {getPriorityLabel(disease.priority)}
@@ -219,7 +219,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
       {/* 일반병원 방문 전략 */}
       <section className="clinic-strategy-section">
-        <h2>🏥 일반병원 방문 시 권장 검사</h2>
+        <h2 className="section-main-title">🏥 일반병원 방문 시 권장 검사</h2>
         <p className="section-subtitle">AI 분석 결과 기반 맞춤 검사 계획</p>
 
         {results.recommendations.clinicStrategy.requiredTests.map((category, idx) => (
@@ -324,7 +324,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
       {/* 대학병원 방문 전략 */}
       <section className="university-strategy-section">
-        <h2>🏛️ 대학병원 방문 전략</h2>
+        <h2 className="section-main-title">🏛️ 대학병원 방문 전략</h2>
 
         {/* 언제 가야 하나 */}
         <div className="when-to-go">
@@ -338,7 +338,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
         {/* 추가 서류 */}
         <div className="additional-documents">
-          <h3>📄 확진을 위해 추가로 준비할 자료</h3>
+          <h3 className="section-main-title">📄 확진을 위해 추가로 준비할 자료</h3>
           {results.recommendations.universityHospitalStrategy.additionalDocuments.map((doc, idx) => (
             <div key={idx} className={`document-card ${doc.importance === '매우 중요' ? 'important' : ''}`}>
               <div className="document-header">
@@ -359,7 +359,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
         {/* 교수에게 물어볼 질문 */}
         <div className="questions-section">
-          <h3>❓ 교수에게 꼭 물어볼 질문</h3>
+          <h3 className="section-main-title">❓ 교수에게 꼭 물어볼 질문</h3>
           <ol className="questions-list">
             {results.recommendations.universityHospitalStrategy.questionsToAsk.map((question, idx) => (
               <li key={idx}>{question}</li>
@@ -369,7 +369,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
         {/* 보험 팁 */}
         <div className="insurance-tips">
-          <h3>💡 보험 관련 핵심 팁</h3>
+          <h3 className="section-main-title">💡 보험 관련 핵심 팁</h3>
           {results.recommendations.universityHospitalStrategy.insuranceTips.map((tip, idx) => (
             <div key={idx} className="tip-card">
               <div className="tip-title">✓ {tip.tip}</div>
@@ -381,7 +381,7 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
 
       {/* 의학 용어 설명 */}
       <section className="medical-terms-section">
-        <h2>📖 의학 용어 쉬운 설명</h2>
+        <h2 className="section-main-title">📖 의학 용어 쉬운 설명</h2>
         
         {results.medicalTerms.map((term, idx) => (
           <div key={idx} className="term-card">
@@ -392,11 +392,11 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
             
             <div className="term-body">
               <div className="korean-name">
-                <strong>한글 정식 명칭:</strong> {term.koreanName}
+                <strong className="section-main-title">한글 정식 명칭:</strong> {term.koreanName}
               </div>
               
               <div className="simple-explanation">
-                <strong>🔍 쉬운 설명:</strong>
+                <strong className="section-main-title">🔍 쉬운 설명:</strong>
                 <p>{term.simpleExplanation}</p>
               </div>
               
@@ -408,21 +408,21 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
               
               {term.analogy && (
                 <div className="analogy">
-                  <strong>💡 비유:</strong>
+                  <strong className="section-main-title">💡 비유:</strong>
                   <p>{term.analogy}</p>
                 </div>
               )}
               
               {term.patientContext && (
                 <div className="patient-context">
-                  <strong>👤 환자분의 경우:</strong>
+                  <strong className="section-main-title">👤 환자분의 경우:</strong>
                   <p>{term.patientContext}</p>
                 </div>
               )}
               
               {term.whatToDo && (
                 <div className="action">
-                  <strong>✅ 해야 할 일:</strong>
+                  <strong className="section-main-title">✅ 해야 할 일:</strong>
                   <p>{term.whatToDo}</p>
                 </div>
               )}
