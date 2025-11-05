@@ -12,7 +12,7 @@ const api = axios.create({
 
 export const analyzeReport = async (file: File): Promise<AnalysisResult> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('image', file);
 
   try {
     console.log('API 요청 시작:', API_BASE_URL);
