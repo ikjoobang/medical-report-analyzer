@@ -401,19 +401,21 @@ app.post('/api/generate-pdf', async (req, res) => {
     const addText = (text, x, y, options = {}) => {
   const fontSize = options.size || 10;
   const font = options.bold ? boldFont : regularFont;
-      
-      lines.forEach((line, index) => {
-        page.drawText(line, {
-          x,
-          y: y - (index * lineHeight),
-          size: fontSize,
-          font: font,
-          color: rgb(0, 0, 0),
-        });
-      });
-      
-      return lines.length;
-    };
+  const lines = wrapText(text, maxWidth - (x - leftMargin), fontSize, font); // ✨ 이 라인 추가!
+  
+  lines.forEach((line, index) => {
+    page.drawText(line, {
+      x,
+      y: y - (index * lineHeight),
+      size: fontSize,
+      font: font,
+      color: rgb(0, 0, 0),
+    });
+  });
+  
+  return lines.length;
+};
+
 
     const addNewPage = () => {
       page = pdfDoc.addPage([595, 842]);
