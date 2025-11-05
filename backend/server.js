@@ -8,8 +8,8 @@ const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const openai = new OpenAI({
-  apiKey: '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'
-});
+  apiKey: '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'
+
 
 // CORS 설정
 const allowedOrigins = [
