@@ -105,9 +105,30 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
         "description": "병에 대한 설명",
         "priority": "HIGH/MODERATE/LOW",
         "observedFeatures": [
-          "영상에서 실제로 관찰된 특징 1",
-          "영상에서 실제로 관찰된 특징 2",
-          "영상에서 실제로 관찰된 특징 3"
+          {
+            "technicalTerm": "전문 의학 용어 (예: 백질 고강도 병변)",
+            "simpleName": "쉬운 이름 (예: 뇌의 흰 부분에 밝게 보이는 부분)",
+            "whatItMeans": "이게 무엇을 의미하는지 - 2-3문장으로 자세히 (예: 뇌의 특정 부위에 혈액 공급이 부족했던 흔적입니다. MRI에서 밝게 보이는 이유는 그 부위의 조직이 손상되어 물이 많이 차있기 때문입니다.)",
+            "analogy": "일반인이 이해하기 쉬운 비유 (예: 마치 오래된 벽에 물이 샌 자국이 남아있는 것처럼, 뇌에도 과거 혈류 문제의 흔적이 남아 있습니다)",
+            "whyImportant": "왜 이것이 중요한지, 어떤 위험과 관련되는지 (예: 이런 병변이 많으면 향후 뇌졸중 위험이 2-3배 높아질 수 있으며, 치매 발생 가능성도 증가합니다)",
+            "locationInImage": "영상의 어느 부분에서 관찰되는지 (예: MRI T2 영상에서 양쪽 대뇌 반구의 백질 부위에 다발성으로 관찰됨)"
+          },
+          {
+            "technicalTerm": "죽상경화성 변화",
+            "simpleName": "혈관벽이 두꺼워지고 딱딱해진 상태",
+            "whatItMeans": "혈관 내벽에 콜레스테롤 등이 쌓여서 혈관이 좁아지고 탄력을 잃은 상태입니다. 이로 인해 혈액이 원활하게 흐르지 못합니다.",
+            "analogy": "수도관 안쪽에 녹이 슬고 때가 껴서 물이 잘 안 나오는 것과 비슷합니다. 혈관도 마찬가지로 안쪽이 좁아져서 피가 잘 안 흐릅니다.",
+            "whyImportant": "혈관이 좁아지면 뇌에 산소와 영양분 공급이 부족해져서 뇌경색(뇌졸중)이 발생할 위험이 높습니다. 협착이 50% 이상이면 적극적인 치료가 필요합니다.",
+            "locationInImage": "내경동맥 및 뇌혈관 조영술 영상에서 혈관 내경이 불규칙하게 좁아진 부분으로 관찰됨"
+          },
+          {
+            "technicalTerm": "다발성 협착",
+            "simpleName": "여러 곳의 혈관이 동시에 좁아진 상태",
+            "whatItMeans": "한 곳이 아니라 여러 혈관이 동시에 좁아져 있다는 뜻입니다. 이는 전신적인 혈관 질환(고혈압, 당뇨, 고지혈증 등)이 있을 가능성을 시사합니다.",
+            "analogy": "집의 수도관 한 곳만 막힌 게 아니라 여러 곳이 동시에 막힌 상황입니다. 전체 배관 시스템을 점검해야 합니다.",
+            "whyImportant": "다발성 협착은 단일 협착보다 뇌졸중 위험이 훨씬 높으며, 전신 혈관 관리가 필요합니다. 심장 혈관도 함께 검사해야 할 수 있습니다.",
+            "locationInImage": "양측 내경동맥, 중대뇌동맥, 전대뇌동맥 등 여러 혈관에서 동시에 협착 소견 관찰"
+          }
         ],
         "references": [
           "ICD-10-CM Official Guidelines (WHO)",
@@ -127,7 +148,16 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
         "englishName": "영문 병명",
         "description": "병에 대한 설명",
         "priority": "MODERATE/LOW",
-        "observedFeatures": ["관찰된 특징들"],
+        "observedFeatures": [
+          {
+            "technicalTerm": "관찰된 특징",
+            "simpleName": "쉬운 이름",
+            "whatItMeans": "의미 설명",
+            "analogy": "비유",
+            "whyImportant": "중요성",
+            "locationInImage": "위치"
+          }
+        ],
         "references": ["참조 기준"],
         "nextSteps": ["권장 조치"]
       }
@@ -156,7 +186,11 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
             {
               "name": "검사명 (한글)",
               "englishName": "English Name",
-              "reason": "왜 이 검사가 필요한지",
+              "reason": "왜 이 검사가 필요한지 - 구체적으로 2-3문장",
+              "whatItChecks": "이 검사로 정확히 무엇을 확인하는지 (예: 혈관이 얼마나 좁아졌는지 정확한 퍼센트, 혈류 속도, 혈전 유무 등)",
+              "howItHelps": "검사 결과가 치료 계획에 어떻게 도움이 되는지 (예: 협착이 50% 이상이면 약물치료, 70% 이상이면 수술 고려)",
+              "whenNeeded": "어떤 경우에 특히 이 검사가 필요한지 (예: 어지럼증, 일시적 시력 저하, 한쪽 팔다리 힘 빠짐 등의 증상이 있을 때)",
+              "whatToExpect": "검사 과정에서 어떤 일이 일어나는지 (예: 목 부위에 젤을 바르고 초음파 기계로 5-10분간 촬영, 전혀 아프지 않음)",
               "fastingRequired": true/false,
               "fastingHours": 8,
               "estimatedCost": "30,000-50,000원",
@@ -272,7 +306,11 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
 2. priority는 HIGH/MODERATE/LOW만 사용
 3. 모든 비용은 "30,000-50,000원" 형식으로 범위 표시
 4. 의학 용어는 최소 5-7개 상세히 설명
-5. 영상에서 보이는 구체적 특징만 observedFeatures에 포함`;
+5. 영상에서 보이는 구체적 특징만 observedFeatures에 포함
+6. observedFeatures는 반드시 객체 형식으로 작성하고, technicalTerm, simpleName, whatItMeans, analogy, whyImportant, locationInImage 필드를 모두 포함
+7. 검사 항목에서 reason은 간단히, whatItChecks, howItHelps, whenNeeded, whatToExpect는 각각 2-3문장으로 자세하게 작성
+8. 모든 의학 용어는 일반인이 이해할 수 있도록 비유와 예시를 포함하여 설명`;
+
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
