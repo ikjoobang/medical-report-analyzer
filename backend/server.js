@@ -360,14 +360,11 @@ app.post('/api/generate-pdf', async (req, res) => {
       return res.status(400).json({ error: '분석 결과가 필요합니다.' });
     }
 
-    const pdfDoc = await PDFDocument.create();
+        const pdfDoc = await PDFDocument.create();
     
-    // 영문 폰트 사용 (한글 폰트 다운로드 제거)
-console.log('영문 폰트 사용');
-const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-nFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    }
-
+    // 영문 폰트 사용
+    console.log('영문 폰트 사용');
+    const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     
     let page = pdfDoc.addPage([595, 842]);
@@ -377,6 +374,7 @@ nFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const maxWidth = 495;
 
     const wrapText = (text, maxWidth, fontSize, font) => {
+
       const words = text.split(' ');
       const lines = [];
       let currentLine = '';
