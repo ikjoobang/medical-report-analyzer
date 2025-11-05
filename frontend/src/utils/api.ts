@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { AnalysisResult } from '../types';
 
-const API_BASE_URL = 'https://medical-report-analyzer-production.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://courteous-passion-production.up.railway.app';
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,
