@@ -362,19 +362,10 @@ app.post('/api/generate-pdf', async (req, res) => {
 
     const pdfDoc = await PDFDocument.create();
     
-    // Noto Sans KR 폰트 다운로드
-    let koreanFont;
-    try {
-      console.log('한글 폰트 다운로드 중...');
-      const fontUrl = 'https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR-Regular.ttf';
-      const fontBytes = await axios.get(fontUrl, { responseType: 'arraybuffer' });
-      
-      pdfDoc.registerFontkit(fontkit);
-      koreanFont = await pdfDoc.embedFont(fontBytes.data);
-      console.log('한글 폰트 로드 성공');
-    } catch (fontError) {
-      console.error('한글 폰트 로드 실패:', fontError.message);
-      koreanFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    // 영문 폰트 사용 (한글 폰트 다운로드 제거)
+console.log('영문 폰트 사용');
+const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+nFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     }
 
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -410,9 +401,8 @@ app.post('/api/generate-pdf', async (req, res) => {
     };
 
     const addText = (text, x, y, options = {}) => {
-      const fontSize = options.size || 10;
-      const font = options.bold ? boldFont : koreanFont;
-      const lines = wrapText(text, maxWidth - (x - leftMargin), fontSize, font);
+  const fontSize = options.size || 10;
+  const font = options.bold ? boldFont : regularFont;
       
       lines.forEach((line, index) => {
         page.drawText(line, {
