@@ -145,9 +145,25 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
                 <div className="observed-features">
                   <h4 className="section-main-title">영상에서 관찰된 특징:</h4>
                   <ul>
-                    {disease.observedFeatures.map((feature, i) => (
-                      <li key={i}>• {feature}</li>
-                    ))}
+                    {disease.observedFeatures.map((feature, i) => {
+                      // 문자열과 객체 모두 지원
+                      if (typeof feature === 'string') {
+                        return <li key={i}>• {feature}</li>;
+                      } else {
+                        return (
+                          <li key={i} className="feature-detailed">
+                            <div className="feature-term">
+                              <strong>{feature.technicalTerm}</strong>
+                              {feature.simpleName && <span className="feature-simple"> ({feature.simpleName})</span>}
+                            </div>
+                            {feature.whatItMeans && <p className="feature-meaning">→ {feature.whatItMeans}</p>}
+                            {feature.analogy && <p className="feature-analogy">💡 {feature.analogy}</p>}
+                            {feature.whyImportant && <p className="feature-important">⚠️ {feature.whyImportant}</p>}
+                            {feature.locationInImage && <p className="feature-location">📍 위치: {feature.locationInImage}</p>}
+                          </li>
+                        );
+                      }
+                    })}
                   </ul>
                 </div>
 
@@ -206,9 +222,25 @@ export const ResultsDisplay: React.FC<Props> = ({ results }) => {
                 <div className="observed-features">
                   <h4>관찰된 특징:</h4>
                   <ul>
-                    {disease.observedFeatures.map((feature, i) => (
-                      <li key={i}>• {feature}</li>
-                    ))}
+                    {disease.observedFeatures.map((feature, i) => {
+                      // 문자열과 객체 모두 지원
+                      if (typeof feature === 'string') {
+                        return <li key={i}>• {feature}</li>;
+                      } else {
+                        return (
+                          <li key={i} className="feature-detailed">
+                            <div className="feature-term">
+                              <strong>{feature.technicalTerm}</strong>
+                              {feature.simpleName && <span className="feature-simple"> ({feature.simpleName})</span>}
+                            </div>
+                            {feature.whatItMeans && <p className="feature-meaning">→ {feature.whatItMeans}</p>}
+                            {feature.analogy && <p className="feature-analogy">💡 {feature.analogy}</p>}
+                            {feature.whyImportant && <p className="feature-important">⚠️ {feature.whyImportant}</p>}
+                            {feature.locationInImage && <p className="feature-location">📍 위치: {feature.locationInImage}</p>}
+                          </li>
+                        );
+                      }
+                    })}
                   </ul>
                 </div>
               </div>
