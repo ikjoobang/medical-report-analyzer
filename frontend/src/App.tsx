@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Upload, FileText, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Upload, FileText, AlertCircle, Sun, Moon } from 'lucide-react';
 import { analyzeReport } from './utils/api';
 import { ResultsDisplay } from './components/ResultsDisplay';
 import type { AnalysisResult } from './types';
@@ -9,6 +9,26 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark-mode');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +71,14 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <button 
+        onClick={toggleDarkMode}
+        className="theme-toggle-btn"
+        aria-label="테마 전환"
+      >
+        {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      </button>
+
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
@@ -97,9 +125,6 @@ function App() {
                     <div>
                       <p className="text-red-800 font-medium">오류가 발생했습니다</p>
                       <p className="text-red-600 text-sm mt-1">{error}</p>
-                      <p className="text-red-500 text-xs mt-2">
-                        계속 문제가 발생하면 백엔드 서버가 실행 중인지 확인해주세요.
-                      </p>
                     </div>
                   </div>
                 )}
