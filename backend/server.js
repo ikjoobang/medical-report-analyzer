@@ -314,7 +314,7 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
 
     const content = response.choices[0].message.content;
     
-        // JSON 추출 (개선된 버전)
+    // JSON 추출 (개선된 버전)
     let analysisResult;
     try {
       // 1. 먼저 ```json 코드 블록 제거
@@ -345,6 +345,359 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
     console.error('분석 에러:', error);
     res.status(500).json({ 
       error: '분석 중 오류가 발생했습니다.',
+      details: error.message 
+    });
+  }
+});
+
+// PDF 생성 엔드포인트 (영문 전용)
+app.post('/api/generate-pdf', async (req, res) => {
+  try {
+    console.log('PDF 생성 요청 수신');
+    const { analysisResult } = req.body;
+
+    if (!analysisResult) {
+      return res.status(400).json({ error: '분석 결과가 필요합니다.' });
+    }
+
+    const pdfDoc = await PDFDocument.create();
+    pdfDoc.registerFontkit(fontkit);
+    
+    // 영문 폰트 사용
+    console.log('영문 폰트 로딩 중...');
+    const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    console.log('폰트 로딩 완료');
+    
+    let page = pdfDoc.addPage([595, 842]);
+    let yPosition = 800;
+    const leftMargin = 50;
+    const lineHeight = 15;
+    const maxWidth = 495;
+
+    // 한글 제거 헬퍼 함수
+    const sanitizeForPDF = (text) => {
+      if (!text) return 'N/A';
+      // ASCII 문자만 유지 (영문, 숫자, 기본 문장부호)
+      const cleaned = text.replace(/[^\x00-\x7F]/g, '').trim();
+      return cleaned || '[Non-ASCII Text Removed]';
+    };
+
+    // 텍스트 줄바꿈 함수
+    const wrapText = (text, maxWidth, fontSize, font) => {
+      const safeText = sanitizeForPDF(text);
+      const words = safeText.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+        
+        if (testWidth > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      
+      return lines;
+    };
+
+    // 텍스트 추가 함수
+    const addText = (text, x, y, options = {}) => {
+      const fontSize = options.size || 10;
+      const font = options.bold ? boldFont : regularFont;
+      const lines = wrapText(text, maxWidth - (x - leftMargin), fontSize, font);
+      
+      lines.forEach((line, index) => {
+        page.drawText(line, {
+          x,
+          y: y - (index * lineHeight),
+          size: fontSize,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+      });
+      
+      return lines.length;
+    };
+
+    const addNewPage = () => {
+      page = pdfDoc.addPage([595, 842]);
+      yPosition = 800;
+    };
+
+    const checkPageBreak = (requiredSpace = 50) => {
+      if (yPosition < requiredSpace) {
+        addNewPage();
+      }
+    };
+
+    // === PDF 내용 생성 시작 ===
+
+    // 제목
+    addText('MEDICAL IMAGE ANALYSIS REPORT', leftMargin, yPosition, { size: 18, bold: true });
+    yPosition -= 20;
+    addText('Studiojuai Medical Diagnostics - AI-Assisted Analysis', leftMargin, yPosition, { size: 10 });
+    yPosition -= 30;
+
+    // 환자 정보
+    addText('PATIENT INFORMATION', leftMargin, yPosition, { size: 14, bold: true });
+    yPosition -= lineHeight + 5;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 1,
+      color: rgb(0, 0, 0)
+    });
+    yPosition -= lineHeight;
+
+    const patientInfo = analysisResult.patientInfo || {};
+    addText(`Name: ${sanitizeForPDF(patientInfo.name) || 'N/A'}`, leftMargin, yPosition);
+    yPosition -= lineHeight;
+    addText(`Patient ID: ${sanitizeForPDF(patientInfo.patientId) || 'N/A'}`, leftMargin, yPosition);
+    yPosition -= lineHeight;
+    addText(`Age/Gender: ${sanitizeForPDF(patientInfo.age) || 'N/A'} / ${sanitizeForPDF(patientInfo.gender) || 'N/A'}`, leftMargin, yPosition);
+    yPosition -= lineHeight * 2;
+
+    // 검사 정보
+    checkPageBreak(100);
+    addText('EXAMINATION DETAILS', leftMargin, yPosition, { size: 14, bold: true });
+    yPosition -= lineHeight + 5;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 1
+    });
+    yPosition -= lineHeight;
+
+    const examInfo = analysisResult.examInfo || {};
+    addText(`Study Type: ${sanitizeForPDF(examInfo.examType) || 'N/A'}`, leftMargin, yPosition);
+    yPosition -= lineHeight;
+    addText(`Exam Date: ${sanitizeForPDF(examInfo.examDate) || 'N/A'}`, leftMargin, yPosition);
+    yPosition -= lineHeight;
+    addText(`Institution: ${sanitizeForPDF(examInfo.institution) || 'N/A'}`, leftMargin, yPosition);
+    yPosition -= lineHeight * 2;
+
+    // Findings
+    checkPageBreak(100);
+    addText('FINDINGS', leftMargin, yPosition, { size: 14, bold: true });
+    yPosition -= lineHeight + 5;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 1
+    });
+    yPosition -= lineHeight;
+
+    if (analysisResult.findings) {
+      const findingsLines = addText(analysisResult.findings, leftMargin, yPosition, { size: 10 });
+      yPosition -= lineHeight * findingsLines + 10;
+    }
+
+    // Impression
+    checkPageBreak(100);
+    addText('IMPRESSION', leftMargin, yPosition, { size: 14, bold: true });
+    yPosition -= lineHeight + 5;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 1
+    });
+    yPosition -= lineHeight;
+
+    if (analysisResult.impression) {
+      const impressionLines = addText(analysisResult.impression, leftMargin, yPosition, { size: 10 });
+      yPosition -= lineHeight * impressionLines + 10;
+    }
+
+    // 진단 코드
+    checkPageBreak(150);
+    addText('DIAGNOSIS (ICD-10 Codes)', leftMargin, yPosition, { size: 14, bold: true });
+    yPosition -= lineHeight + 5;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 1
+    });
+    yPosition -= lineHeight * 1.5;
+
+    addText('Primary Diagnoses:', leftMargin, yPosition, { bold: true });
+    yPosition -= lineHeight * 1.5;
+
+    if (analysisResult.diseaseCodes?.primary) {
+      for (const disease of analysisResult.diseaseCodes.primary) {
+        checkPageBreak(100);
+        
+        addText(`${disease.code || 'N/A'} - ${sanitizeForPDF(disease.englishName) || disease.name || 'N/A'}`, leftMargin + 10, yPosition, { bold: true });
+        yPosition -= lineHeight;
+        addText(`Priority: ${disease.priority || 'N/A'}`, leftMargin + 10, yPosition);
+        yPosition -= lineHeight * 1.5;
+        
+        if (disease.description) {
+          addText('Description:', leftMargin + 10, yPosition, { size: 9, bold: true });
+          yPosition -= lineHeight;
+          const descLines = addText(disease.description, leftMargin + 20, yPosition, { size: 9 });
+          yPosition -= lineHeight * descLines * 0.9 + 5;
+        }
+        
+        if (disease.observedFeatures && disease.observedFeatures.length > 0) {
+          addText('Evidence:', leftMargin + 10, yPosition, { size: 9, bold: true });
+          yPosition -= lineHeight;
+          
+          for (const feature of disease.observedFeatures) {
+            checkPageBreak(30);
+            const lineCount = addText(`- ${feature}`, leftMargin + 20, yPosition, { size: 9 });
+            yPosition -= lineHeight * lineCount * 0.9;
+          }
+        }
+        yPosition -= lineHeight;
+      }
+    }
+
+    // Secondary Diagnoses
+    if (analysisResult.diseaseCodes?.secondary && analysisResult.diseaseCodes.secondary.length > 0) {
+      checkPageBreak(100);
+      addText('Secondary Diagnoses:', leftMargin, yPosition, { bold: true });
+      yPosition -= lineHeight * 1.5;
+
+      for (const disease of analysisResult.diseaseCodes.secondary) {
+        checkPageBreak(60);
+        addText(`${disease.code || 'N/A'} - ${sanitizeForPDF(disease.englishName) || disease.name || 'N/A'}`, leftMargin + 10, yPosition);
+        yPosition -= lineHeight;
+        addText(`Priority: ${disease.priority || 'N/A'}`, leftMargin + 10, yPosition, { size: 9 });
+        yPosition -= lineHeight * 1.5;
+      }
+    }
+
+    // 권장 검사
+    checkPageBreak(150);
+    yPosition -= lineHeight;
+    addText('RECOMMENDED ADDITIONAL TESTS', leftMargin, yPosition, { size: 14, bold: true });
+    yPosition -= lineHeight + 5;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 1
+    });
+    yPosition -= lineHeight * 1.5;
+
+    if (analysisResult.recommendations?.clinicStrategy?.requiredTests) {
+      for (const category of analysisResult.recommendations.clinicStrategy.requiredTests) {
+        checkPageBreak(80);
+        addText(sanitizeForPDF(category.category), leftMargin, yPosition, { bold: true });
+        yPosition -= lineHeight;
+        
+        if (category.tests) {
+          for (const test of category.tests) {
+            checkPageBreak(40);
+            const testName = sanitizeForPDF(test.englishName) || sanitizeForPDF(test.name) || 'Test';
+            addText(`- ${testName}`, leftMargin + 10, yPosition);
+            yPosition -= lineHeight * 0.8;
+            if (test.reason) {
+              addText(`  Reason: ${sanitizeForPDF(test.reason)}`, leftMargin + 15, yPosition, { size: 8 });
+              yPosition -= lineHeight * 0.8;
+            }
+          }
+        }
+        yPosition -= lineHeight;
+      }
+    }
+
+    // Medical Terms (영문만)
+    if (analysisResult.medicalTerms && analysisResult.medicalTerms.length > 0) {
+      checkPageBreak(150);
+      yPosition -= lineHeight;
+      addText('MEDICAL TERMINOLOGY', leftMargin, yPosition, { size: 14, bold: true });
+      yPosition -= lineHeight + 5;
+      page.drawLine({
+        start: { x: leftMargin, y: yPosition },
+        end: { x: 545, y: yPosition },
+        thickness: 1
+      });
+      yPosition -= lineHeight * 1.5;
+
+      for (const term of analysisResult.medicalTerms.slice(0, 5)) {
+        checkPageBreak(60);
+        addText(sanitizeForPDF(term.term) || 'Medical Term', leftMargin, yPosition, { bold: true });
+        yPosition -= lineHeight;
+        if (term.simpleExplanation) {
+          const expLines = addText(sanitizeForPDF(term.simpleExplanation), leftMargin + 10, yPosition, { size: 9 });
+          yPosition -= lineHeight * expLines * 0.9 + 5;
+        }
+      }
+    }
+
+    // 면책 조항
+    checkPageBreak(150);
+    yPosition -= lineHeight * 2;
+    page.drawLine({
+      start: { x: leftMargin, y: yPosition },
+      end: { x: 545, y: yPosition },
+      thickness: 2
+    });
+    yPosition -= lineHeight * 1.5;
+
+    addText('IMPORTANT DISCLAIMER', leftMargin, yPosition, { size: 12, bold: true });
+    yPosition -= lineHeight * 1.5;
+
+    const disclaimerLines = [
+      'This AI-assisted analysis is for reference only.',
+      'Final diagnosis must be confirmed by a board-certified radiologist.',
+      'This report cannot be used as a basis for treatment decisions.',
+      'Always consult with qualified medical professionals.'
+    ];
+
+    for (const line of disclaimerLines) {
+      checkPageBreak(30);
+      addText(line, leftMargin, yPosition, { size: 9 });
+      yPosition -= lineHeight * 0.9;
+    }
+
+    // 푸터
+    const pages = pdfDoc.getPages();
+    pages.forEach((p, index) => {
+      p.drawText(`Generated: ${new Date().toISOString().split('T')[0]}`, {
+        x: leftMargin,
+        y: 30,
+        size: 8,
+        font: regularFont,
+        color: rgb(0, 0, 0)
+      });
+      p.drawText(`Page ${index + 1} of ${pages.length}`, {
+        x: 400,
+        y: 30,
+        size: 8,
+        font: regularFont,
+        color: rgb(0, 0, 0)
+      });
+      p.drawText(`Report ID: STJA-${Date.now()}`, {
+        x: 200,
+        y: 30,
+        size: 8,
+        font: regularFont,
+        color: rgb(0, 0, 0)
+      });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Medical_Report_${Date.now()}.pdf`);
+    res.send(Buffer.from(pdfBytes));
+
+    console.log('PDF 생성 완료');
+
+  } catch (error) {
+    console.error('PDF 생성 에러:', error);
+    res.status(500).json({ 
+      error: 'PDF 생성 중 오류가 발생했습니다.',
       details: error.message 
     });
   }
