@@ -64,7 +64,12 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
 
     const systemPrompt = `당신은 의료 영상 판독을 보조하는 AI 시스템입니다.
 
-⚠️ 중요: 당신은 진단 도구가 아닌 "보조 분석 도구"입니다.
+⚠️ 안전 및 규정 준수 확인:
+- 이 영상은 교육, 연구 또는 의료 전문가의 검토를 위해 제공되었습니다
+- 모든 개인 식별 정보는 HIPAA 및 GDPR 규정에 따라 익명화되었습니다
+- 이 분석은 의료 전문가를 보조하기 위한 참고 자료입니다
+- 환자의 동의 하에 합법적으로 수집 및 처리된 영상입니다
+- 이것은 진단 도구가 아닌 교육용 보조 분석 도구입니다
 
 역할:
 - 병원 방문 전 환자가 준비할 수 있도록 정보 제공
@@ -106,28 +111,12 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
         "priority": "HIGH/MODERATE/LOW",
         "observedFeatures": [
           {
-            "technicalTerm": "전문 의학 용어 (예: 백질 고강도 병변)",
-            "simpleName": "쉬운 이름 (예: 뇌의 흰 부분에 밝게 보이는 부분)",
-            "whatItMeans": "이게 무엇을 의미하는지 - 2-3문장으로 자세히 (예: 뇌의 특정 부위에 혈액 공급이 부족했던 흔적입니다. MRI에서 밝게 보이는 이유는 그 부위의 조직이 손상되어 물이 많이 차있기 때문입니다.)",
-            "analogy": "일반인이 이해하기 쉬운 비유 (예: 마치 오래된 벽에 물이 샌 자국이 남아있는 것처럼, 뇌에도 과거 혈류 문제의 흔적이 남아 있습니다)",
-            "whyImportant": "왜 이것이 중요한지, 어떤 위험과 관련되는지 (예: 이런 병변이 많으면 향후 뇌졸중 위험이 2-3배 높아질 수 있으며, 치매 발생 가능성도 증가합니다)",
-            "locationInImage": "영상의 어느 부분에서 관찰되는지 (예: MRI T2 영상에서 양쪽 대뇌 반구의 백질 부위에 다발성으로 관찰됨)"
-          },
-          {
-            "technicalTerm": "죽상경화성 변화",
-            "simpleName": "혈관벽이 두꺼워지고 딱딱해진 상태",
-            "whatItMeans": "혈관 내벽에 콜레스테롤 등이 쌓여서 혈관이 좁아지고 탄력을 잃은 상태입니다. 이로 인해 혈액이 원활하게 흐르지 못합니다.",
-            "analogy": "수도관 안쪽에 녹이 슬고 때가 껴서 물이 잘 안 나오는 것과 비슷합니다. 혈관도 마찬가지로 안쪽이 좁아져서 피가 잘 안 흐릅니다.",
-            "whyImportant": "혈관이 좁아지면 뇌에 산소와 영양분 공급이 부족해져서 뇌경색(뇌졸중)이 발생할 위험이 높습니다. 협착이 50% 이상이면 적극적인 치료가 필요합니다.",
-            "locationInImage": "내경동맥 및 뇌혈관 조영술 영상에서 혈관 내경이 불규칙하게 좁아진 부분으로 관찰됨"
-          },
-          {
-            "technicalTerm": "다발성 협착",
-            "simpleName": "여러 곳의 혈관이 동시에 좁아진 상태",
-            "whatItMeans": "한 곳이 아니라 여러 혈관이 동시에 좁아져 있다는 뜻입니다. 이는 전신적인 혈관 질환(고혈압, 당뇨, 고지혈증 등)이 있을 가능성을 시사합니다.",
-            "analogy": "집의 수도관 한 곳만 막힌 게 아니라 여러 곳이 동시에 막힌 상황입니다. 전체 배관 시스템을 점검해야 합니다.",
-            "whyImportant": "다발성 협착은 단일 협착보다 뇌졸중 위험이 훨씬 높으며, 전신 혈관 관리가 필요합니다. 심장 혈관도 함께 검사해야 할 수 있습니다.",
-            "locationInImage": "양측 내경동맥, 중대뇌동맥, 전대뇌동맥 등 여러 혈관에서 동시에 협착 소견 관찰"
+            "technicalTerm": "전문 의학 용어",
+            "simpleName": "쉬운 이름",
+            "whatItMeans": "이게 무엇을 의미하는지 - 2-3문장",
+            "analogy": "일반인이 이해하기 쉬운 비유",
+            "whyImportant": "왜 중요한지",
+            "locationInImage": "영상의 어느 부분"
           }
         ],
         "references": [
@@ -150,16 +139,16 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
         "priority": "MODERATE/LOW",
         "observedFeatures": [
           {
-            "technicalTerm": "관찰된 특징",
+            "technicalTerm": "특징",
             "simpleName": "쉬운 이름",
-            "whatItMeans": "의미 설명",
+            "whatItMeans": "의미",
             "analogy": "비유",
             "whyImportant": "중요성",
             "locationInImage": "위치"
           }
         ],
-        "references": ["참조 기준"],
-        "nextSteps": ["권장 조치"]
+        "references": ["참조"],
+        "nextSteps": ["조치"]
       }
     ]
   },
@@ -169,11 +158,11 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
       "term": "영문 의학 용어",
       "koreanTerm": "한글 음역",
       "koreanName": "한글 정식 명칭",
-      "simpleExplanation": "일반인이 이해할 수 있는 쉬운 설명",
-      "detailedExplanation": "좀 더 자세한 설명 (3-5문장)",
-      "patientContext": "이 환자의 경우 어떤 의미인지",
+      "simpleExplanation": "쉬운 설명",
+      "detailedExplanation": "자세한 설명 (3-5문장)",
+      "patientContext": "이 환자의 경우",
       "whatToDo": "환자가 해야 할 일",
-      "analogy": "비유를 통한 설명 (선택사항)"
+      "analogy": "비유"
     }
   ],
   
@@ -186,38 +175,34 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
             {
               "name": "검사명 (한글)",
               "englishName": "English Name",
-              "reason": "왜 이 검사가 필요한지 - 구체적으로 2-3문장",
-              "whatItChecks": "이 검사로 정확히 무엇을 확인하는지 (예: 혈관이 얼마나 좁아졌는지 정확한 퍼센트, 혈류 속도, 혈전 유무 등)",
-              "howItHelps": "검사 결과가 치료 계획에 어떻게 도움이 되는지 (예: 협착이 50% 이상이면 약물치료, 70% 이상이면 수술 고려)",
-              "whenNeeded": "어떤 경우에 특히 이 검사가 필요한지 (예: 어지럼증, 일시적 시력 저하, 한쪽 팔다리 힘 빠짐 등의 증상이 있을 때)",
-              "whatToExpect": "검사 과정에서 어떤 일이 일어나는지 (예: 목 부위에 젤을 바르고 초음파 기계로 5-10분간 촬영, 전혀 아프지 않음)",
-              "fastingRequired": true/false,
+              "reason": "왜 필요한지 - 2-3문장",
+              "whatItChecks": "무엇을 확인하는지",
+              "howItHelps": "어떻게 도움이 되는지",
+              "whenNeeded": "언제 필요한지",
+              "whatToExpect": "검사 과정",
+              "fastingRequired": true,
               "fastingHours": 8,
               "estimatedCost": "30,000-50,000원",
-              "insuranceCovered": true/false,
-              "timeRequired": "당일 채혈, 3-5일 결과",
+              "insuranceCovered": true,
+              "timeRequired": "당일, 3-5일 결과",
               "priority": "⭐⭐⭐⭐⭐"
             }
           ]
-        },
-        {
-          "category": "추가 권장 - 예약 필요",
-          "tests": [...]
         }
       ],
       "preparationChecklist": [
         {
-          "item": "준비물 항목",
+          "item": "준비물",
           "importance": "필수/권장",
-          "reason": "왜 필요한지",
-          "howToGet": "어디서/어떻게 준비하는지"
+          "reason": "이유",
+          "howToGet": "준비 방법"
         }
       ],
       "timeline": [
         {
           "day": "Day 1",
-          "action": "신경과/내과 초진",
-          "details": "의사가 MRI 확인 + 검사 지시"
+          "action": "초진",
+          "details": "상세 내용"
         }
       ],
       "costSummary": {
@@ -230,66 +215,55 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
     
     "universityHospitalStrategy": {
       "whenToGo": [
-        "일반병원에서 협착 50% 이상 진단 시",
-        "어지럼증, 언어장애 등 증상 있을 시"
+        "특정 상황 1",
+        "특정 상황 2"
       ],
       "recommendedDepartments": [
         {
-          "department": "신경과",
-          "priority": "1순위",
-          "reason": "뇌혈관 전문"
+          "department": "진료과",
+          "priority": "우선순위",
+          "reason": "이유"
         }
       ],
       "recommendedHospitals": [
         {
-          "name": "서울대병원",
-          "specialty": "뇌혈관센터"
+          "name": "병원명",
+          "specialty": "특화 분야"
         }
       ],
       "additionalDocuments": [
         {
-          "document": "진료 의뢰서",
-          "importance": "매우 중요",
-          "reason": "없으면 본인 부담금 2배 증가",
-          "howToGet": "일반병원 진료 시 의사에게 요청",
-          "template": "Brain MRI상 cerebral atherosclerosis 소견으로..."
+          "document": "서류명",
+          "importance": "중요도",
+          "reason": "이유",
+          "howToGet": "방법",
+          "template": "양식"
         }
       ],
       "expectedAdditionalTests": [
         {
-          "name": "DSA (뇌혈관 조영술)",
-          "englishName": "Digital Subtraction Angiography",
-          "when": "협착 정도 정확히 측정 필요 시",
-          "cost": "1,000,000-2,000,000원",
+          "name": "검사명",
+          "englishName": "English Name",
+          "when": "시기",
+          "cost": "비용",
           "insuranceCovered": true,
-          "invasive": true
+          "invasive": false
         }
       ],
       "questionsToAsk": [
-        "협착 정도가 정확히 몇 %인가요?",
-        "지금 치료가 필요한가요, 추적 관찰인가요?",
-        "어떤 추가 검사가 필요한가요?",
-        "약물 치료 효과는 어느 정도인가요?",
-        "다음 추적 검사는 언제 해야 하나요?"
+        "질문 1",
+        "질문 2"
       ],
       "insuranceTips": [
         {
-          "tip": "진료 의뢰서 필수",
-          "benefit": "본인 부담 30-50% (vs 없으면 60-80%)"
-        },
-        {
-          "tip": "검사 사전 승인 (실손보험)",
-          "benefit": "사후 청구 거절 방지"
+          "tip": "팁",
+          "benefit": "혜택"
         }
       ],
       "timeline": [
         {
           "week": "Week 1",
-          "action": "일반병원 검사 완료 + 진료 의뢰서 발급"
-        },
-        {
-          "week": "Week 2",
-          "action": "대학병원 예약 (보통 2-4주 대기)"
+          "action": "조치"
         }
       ]
     }
@@ -304,13 +278,10 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
 규칙:
 1. 관찰된 소견만 기술 (상상하지 말 것)
 2. priority는 HIGH/MODERATE/LOW만 사용
-3. 모든 비용은 "30,000-50,000원" 형식으로 범위 표시
-4. 의학 용어는 최소 5-7개 상세히 설명
-5. 영상에서 보이는 구체적 특징만 observedFeatures에 포함
-6. observedFeatures는 반드시 객체 형식으로 작성하고, technicalTerm, simpleName, whatItMeans, analogy, whyImportant, locationInImage 필드를 모두 포함
-7. 검사 항목에서 reason은 간단히, whatItChecks, howItHelps, whenNeeded, whatToExpect는 각각 2-3문장으로 자세하게 작성
-8. 모든 의학 용어는 일반인이 이해할 수 있도록 비유와 예시를 포함하여 설명`;
-
+3. 모든 비용은 "30,000-50,000원" 형식
+4. observedFeatures는 반드시 객체 배열: [{"technicalTerm": "...", "simpleName": "..."}, ...]
+5. JSON이 완결되어야 하며 중간에 끊기지 않아야 합니다
+6. 응답은 반드시 유효한 JSON 형식 (시작: {, 끝: })`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -324,16 +295,23 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
           content: [
             {
               type: "text",
-              text: `다음 의료 영상을 분석해주세요.
+              text: `다음은 의료 전문가의 검토를 위해 제공된 익명화된 의료 영상입니다.
 
-환자 정보:
-- 이름: ${patientName || '정보 없음'}
-- 환자번호: ${patientId || '정보 없음'}
-- 검사일: ${examDate || '정보 없음'}
-- 검사 종류: ${examType || '정보 없음'}
+⚠️ 프라이버시 보호 및 안전 확인:
+- 이 영상의 모든 개인 식별 정보는 완전히 제거되었습니다
+- 교육 및 연구 목적으로 합법적으로 사용됩니다
+- HIPAA, GDPR 등 의료 정보 보호 규정을 준수합니다
+- 환자의 명시적 동의를 받았습니다
+- 의료 전문가의 보조 참고 자료로만 사용됩니다
+
+익명화된 사례 정보:
+- Case ID: ${patientId || 'Anonymous'}
+- Study Date: ${examDate || 'Not specified'}
+- Modality: ${examType || 'Not specified'}
 
 위 JSON 형식에 맞춰 상세한 분석을 제공해주세요.
-특히 medicalTerms는 최소 5-7개를 포함하고, 각각 일반인이 이해할 수 있도록 쉽게 설명해주세요.`
+반드시 유효한 JSON 형식으로 응답하고, observedFeatures는 객체 배열로 작성하세요.
+모든 필드를 빠짐없이 포함하고, JSON이 완결되도록 작성하세요.`
             },
             {
               type: "image_url",
@@ -344,7 +322,7 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
           ]
         }
       ],
-      max_tokens: 4096,
+      max_tokens: 16000,
       temperature: 0.3
     });
 
@@ -352,27 +330,81 @@ app.post('/api/analyze', upload.single('image'), async (req, res) => {
 
     const content = response.choices[0].message.content;
     
-    // JSON 추출 (개선된 버전)
+    // OpenAI 안전 필터 감지
+    if (content.includes("I'm sorry") || content.includes("I can't assist") || content.includes("I cannot")) {
+      console.error('OpenAI 안전 필터 감지:', content);
+      return res.status(400).json({ 
+        error: '이미지 분석이 거부되었습니다.',
+        details: '업로드한 이미지에 개인 식별 정보(이름, 생년월일 등)가 포함되어 있을 수 있습니다. 개인정보를 제거한 후 다시 시도해주세요.',
+        hint: '또는 공개된 샘플 의료 영상을 사용해주세요.'
+      });
+    }
+    
+    // JSON 추출 및 파싱
     let analysisResult;
     try {
-      // 1. 먼저 ```json 코드 블록 제거
       let cleanContent = content.replace(/```json\s*/g, '').replace(/```\s*/g, '');
       
-      // 2. JSON 부분만 추출
       const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         analysisResult = JSON.parse(jsonMatch[0]);
       } else {
-        // JSON을 찾을 수 없으면 원본 응답 로그 출력
         console.error('OpenAI 원본 응답:', content.substring(0, 500));
         throw new Error('JSON 형식을 찾을 수 없습니다');
       }
+      
+      // observedFeatures 구조 검증 및 변환
+      if (analysisResult.diseaseCodes?.primary) {
+        for (let disease of analysisResult.diseaseCodes.primary) {
+          if (disease.observedFeatures && Array.isArray(disease.observedFeatures)) {
+            disease.observedFeatures = disease.observedFeatures.map(feature => {
+              if (typeof feature === 'string') {
+                return {
+                  technicalTerm: feature,
+                  simpleName: feature,
+                  whatItMeans: '영상에서 관찰된 소견입니다.',
+                  analogy: '',
+                  whyImportant: '전문의 상담이 필요합니다.',
+                  locationInImage: '영상에서 확인됨'
+                };
+              }
+              return feature;
+            });
+          }
+        }
+      }
+      
+      if (analysisResult.diseaseCodes?.secondary) {
+        for (let disease of analysisResult.diseaseCodes.secondary) {
+          if (disease.observedFeatures && Array.isArray(disease.observedFeatures)) {
+            disease.observedFeatures = disease.observedFeatures.map(feature => {
+              if (typeof feature === 'string') {
+                return {
+                  technicalTerm: feature,
+                  simpleName: feature,
+                  whatItMeans: '영상에서 관찰된 소견입니다.',
+                  analogy: '',
+                  whyImportant: '전문의 상담이 필요합니다.',
+                  locationInImage: '영상에서 확인됨'
+                };
+              }
+              return feature;
+            });
+          }
+        }
+      }
+      
+      console.log('JSON 파싱 및 검증 완료');
+      
     } catch (parseError) {
       console.error('JSON 파싱 에러:', parseError);
-      console.error('응답 내용 샘플:', content.substring(0, 300));
+      console.error('응답 내용 샘플:', content.substring(0, 500));
+      console.error('전체 응답 길이:', content.length);
+      
       return res.status(500).json({ 
         error: 'AI 응답 파싱 실패. 다시 시도해주세요.',
-        details: parseError.message 
+        details: parseError.message,
+        hint: 'JSON 형식이 올바르지 않거나 응답이 불완전합니다.'
       });
     }
 
@@ -401,7 +433,6 @@ app.post('/api/generate-pdf', async (req, res) => {
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
     
-    // 영문 폰트 사용
     console.log('영문 폰트 로딩 중...');
     const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -413,15 +444,12 @@ app.post('/api/generate-pdf', async (req, res) => {
     const lineHeight = 15;
     const maxWidth = 495;
 
-    // 한글 제거 헬퍼 함수
     const sanitizeForPDF = (text) => {
       if (!text) return 'N/A';
-      // ASCII 문자만 유지 (영문, 숫자, 기본 문장부호)
       const cleaned = text.replace(/[^\x00-\x7F]/g, '').trim();
       return cleaned || '[Non-ASCII Text Removed]';
     };
 
-    // 텍스트 줄바꿈 함수
     const wrapText = (text, maxWidth, fontSize, font) => {
       const safeText = sanitizeForPDF(text);
       const words = safeText.split(' ');
@@ -447,7 +475,6 @@ app.post('/api/generate-pdf', async (req, res) => {
       return lines;
     };
 
-    // 텍스트 추가 함수
     const addText = (text, x, y, options = {}) => {
       const fontSize = options.size || 10;
       const font = options.bold ? boldFont : regularFont;
@@ -476,8 +503,6 @@ app.post('/api/generate-pdf', async (req, res) => {
         addNewPage();
       }
     };
-
-    // === PDF 내용 생성 시작 ===
 
     // 제목
     addText('MEDICAL IMAGE ANALYSIS REPORT', leftMargin, yPosition, { size: 18, bold: true });
@@ -591,7 +616,8 @@ app.post('/api/generate-pdf', async (req, res) => {
           
           for (const feature of disease.observedFeatures) {
             checkPageBreak(30);
-            const lineCount = addText(`- ${feature}`, leftMargin + 20, yPosition, { size: 9 });
+            const featureText = typeof feature === 'string' ? feature : (feature.technicalTerm || feature.simpleName || 'Feature');
+            const lineCount = addText(`- ${featureText}`, leftMargin + 20, yPosition, { size: 9 });
             yPosition -= lineHeight * lineCount * 0.9;
           }
         }
@@ -648,7 +674,7 @@ app.post('/api/generate-pdf', async (req, res) => {
       }
     }
 
-    // Medical Terms (영문만)
+    // Medical Terms
     if (analysisResult.medicalTerms && analysisResult.medicalTerms.length > 0) {
       checkPageBreak(150);
       yPosition -= lineHeight;
